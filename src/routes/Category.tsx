@@ -6,7 +6,7 @@ import LoadingSkeleton from "@/components/common/LoadingSkeleton";
 import ErrorState from "@/components/common/ErrorState";
 import ThreadItem from "@/components/forum/ThreadItem";
 import EmptyState from "@/components/forum/EmptyState";
-import { SelectArrowIcon } from "@radix-ui/react-select";
+import { ChevronDown } from "lucide-react";
 
 const sortOptions = [
   { value: "new", label: "Neueste" },
@@ -60,7 +60,7 @@ const Category = () => {
                 </option>
               ))}
             </select>
-            <SelectArrowIcon className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
         </div>
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import PageTransition from "@/components/layout/PageTransition";
 import { useForumStore } from "@/store/forumStore";
 import Composer from "@/components/forum/Composer";
-import { SelectArrowIcon } from "@radix-ui/react-select";
+import { ChevronDown } from "lucide-react";
 import type { Category } from "@/lib/api/types";
 import { toast } from "sonner";
 
@@ -63,7 +63,7 @@ const CreatePost = () => {
                   </option>
                 ))}
               </select>
-              <SelectArrowIcon className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             </div>
           </div>
           <Composer onSubmit={handleSubmit} variant="thread" isSubmitting={submitting} />
