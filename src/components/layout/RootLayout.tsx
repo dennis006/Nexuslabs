@@ -12,7 +12,6 @@ import {
   SheetHeader,
   SheetTitle
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils/cn";
 
 const RootLayout = ({ children }: PropsWithChildren) => {
   const sidebarLeftOpen = useUiStore((state) => state.sidebarLeftOpen);
@@ -24,48 +23,9 @@ const RootLayout = ({ children }: PropsWithChildren) => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
-      <div className="flex-1 pt-4 md:pt-6">
-        <main
-          data-density={density}
-          className="mx-auto max-w-[1600px] px-4 sm:px-6 lg:px-8 2xl:max-w-[1720px] 2xl:px-10 3xl:max-w-[1880px]"
-        >
-          <div
-            className={cn(
-              "grid grid-cols-1 gap-6 items-start lg:grid-cols-[300px_minmax(640px,1fr)_380px] xl:gap-8 2xl:gap-10",
-              density === "compact" && "gap-5 xl:gap-6 2xl:gap-8"
-            )}
-          >
-            <aside
-              className={cn(
-                "sticky top-24 hidden space-y-4 lg:block",
-                density === "compact" && "space-y-3"
-              )}
-              data-density={density}
-            >
-              <SidebarLeftStats />
-            </aside>
-            <section
-              className={cn(
-                "mx-auto w-full max-w-[960px] space-y-6 md:space-y-8 2xl:max-w-[1040px]",
-                "lg:col-span-2 xl:col-span-1",
-                density === "compact" && "space-y-4 md:space-y-5"
-              )}
-              data-density={density}
-            >
-              {children}
-            </section>
-            <aside
-              className={cn(
-                "sticky top-24 hidden space-y-4 xl:block w-[340px] xl:w-[360px] 2xl:w-[380px]",
-                density === "compact" && "space-y-3"
-              )}
-              data-density={density}
-            >
-              <SidebarRightTrends />
-            </aside>
-          </div>
-        </main>
-      </div>
+      <main data-density={density} className="flex-1 pt-4 md:pt-6">
+        {children}
+      </main>
       <Footer />
       <div className="fixed bottom-6 right-6 z-40">
         <ChatDock className="w-[360px] 2xl:w-[380px]" />

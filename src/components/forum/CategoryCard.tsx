@@ -19,7 +19,6 @@ import {
   Users
 } from "lucide-react";
 import { useUiStore } from "@/store/uiStore";
-import SubcategoryCollapse from "@/components/forum/SubcategoryCollapse";
 
 const iconMap: Record<string, LucideIcon> = {
   crosshair: Crosshair,
@@ -50,27 +49,37 @@ const CategoryCard = ({ category }: { category: Category }) => {
       className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       data-density={density}
     >
-      <Card className="relative h-full overflow-hidden rounded-2xl border-border/60 bg-card/80 shadow-[0_20px_45px_-28px_rgba(0,0,0,0.55)] transition-colors hover:border-primary/50 supports-[backdrop-filter]:bg-card/75">
-        <div
-          className="flex min-h-[180px] flex-col p-5 md:p-6 2xl:p-7 data-[density=compact]:p-4"
-          data-density={density}
-        >
+      <Card className="rounded-2xl border bg-card/80 backdrop-blur shadow-sm">
+        <div className="flex min-h-[190px] flex-col p-5 md:p-6 2xl:p-7 data-[density=compact]:p-4 md:data-[density=compact]:p-5" data-density={density}>
           <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-              <Icon className="h-5 w-5" aria-hidden="true" />
-            </span>
-            <h3 className="text-lg font-semibold tracking-tight md:text-xl">{category.name}</h3>
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10">
+              <Icon className="h-5 w-5 text-primary" aria-hidden="true" />
+            </div>
+            <h3 className="text-lg md:text-xl font-semibold tracking-tight">{category.name}</h3>
           </div>
 
-          {category.description ? (
-            <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+          {category.description && (
+            <p className="mt-2 line-clamp-2 text-sm text-muted-foreground leading-relaxed">
               {category.description}
             </p>
-          ) : null}
+          )}
 
-          {category.subcategories?.length ? <SubcategoryCollapse subs={category.subcategories} /> : null}
+          {!!category.subcategories?.length && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {category.subcategories.slice(0, 6).map((s) => (
+                <span key={`sub_${s.id}`} className="rounded-full bg-secondary/60 px-2.5 py-1 text-[11px]">
+                  {s.name}
+                </span>
+              ))}
+              {category.subcategories.length > 6 && (
+                <button className="text-[11px] text-primary hover:underline">
+                  +{category.subcategories.length - 6} mehr
+                </button>
+              )}
+            </div>
+          )}
 
-          <div className="mt-auto flex items-center gap-3 pt-4 text-xs text-muted-foreground md:text-sm">
+          <div className="mt-auto pt-4 flex items-center gap-3 text-xs md:text-sm text-muted-foreground">
             <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
               {category.threadCount} Threads
             </Badge>
