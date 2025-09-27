@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import RootLayout from "@/components/layout/RootLayout";
@@ -45,35 +45,33 @@ const ThemeWatcher = () => {
 };
 
 const SessionManager = () => {
-  const user = useUserStore((state) => state.user);
+  const triedRef = useRef(false);
   const setSession = useUserStore((state) => state.setSession);
   const clear = useUserStore((state) => state.clear);
-  const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
-    if (user && !bootstrapped) {
-      setBootstrapped(true);
-    }
-  }, [user, bootstrapped]);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (user || bootstrapped) {
+    if (triedRef.current) {
       return;
     }
+    triedRef.current = true;
+
+    let cancelled = false;
 
     (async () => {
       try {
         const refreshed = await refresh();
-        const profile = await me(refreshed.accessToken);
         if (cancelled) return;
-        setSession(profile.user, refreshed.accessToken);
+
+        if (refreshed?.accessToken) {
+          const profile = await me(refreshed.accessToken);
+          if (cancelled) return;
+          setSession(profile.user, refreshed.accessToken);
+        } else {
+          clear();
+        }
       } catch {
-        if (cancelled) return;
-        clear();
-      } finally {
         if (!cancelled) {
-          setBootstrapped(true);
+          clear();
         }
       }
     })();
@@ -81,7 +79,7 @@ const SessionManager = () => {
     return () => {
       cancelled = true;
     };
-  }, [user, bootstrapped, setSession, clear]);
+  }, [setSession, clear]);
 
   return null;
 };

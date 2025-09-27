@@ -1,7 +1,6 @@
 import type { FastifyPluginAsync, FastifyReply } from "fastify";
 import { z } from "zod";
 import argon2 from "argon2";
-import { env } from "../env";
 
 const RegisterSchema = z.object({
   email: z.string().email(),
@@ -23,7 +22,7 @@ const authRoutes: FastifyPluginAsync = async (app) => {
     reply.setCookie("refresh_token", token, {
       httpOnly: true,
       sameSite: "lax",
-      secure: env.node === "production",
+      secure: false,
       path: "/auth",
       maxAge: 60 * 60 * 24 * 7
     });
@@ -141,6 +140,10 @@ const authRoutes: FastifyPluginAsync = async (app) => {
   app.post("/logout", async (_request, reply) => {
     reply.clearCookie("refresh_token", { path: "/auth" });
     return reply.send({ ok: true });
+  });
+
+  app.get("/debug/cookies", async (request, reply) => {
+    return reply.send({ cookies: request.cookies });
   });
 
   app.get("/me", async (request, reply) => {
