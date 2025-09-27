@@ -1,7 +1,58 @@
-import type { FastifyPluginAsync } from "fastify";
+import type { FastifyBaseLogger, FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import argon2 from "argon2";
-import bcrypt from "bcryptjs";
+
+type BcryptCompare = (data: string, encrypted: string) => Promise<boolean> | boolean;
+
+let cachedBcryptCompare: ((data: string, encrypted: string) => Promise<boolean>) | null = null;
+
+async function loadBcryptCompare(logger: FastifyBaseLogger) {
+  if (cachedBcryptCompare) {
+    return cachedBcryptCompare;
+  }
+
+  let compare: BcryptCompare | undefined;
+  try {
+    const mod: { default?: { compare?: BcryptCompare }; compare?: BcryptCompare } = await import(
+      "bcryptjs"
+    );
+    const candidate: { compare?: BcryptCompare } | undefined = mod.default ?? mod;
+    compare = candidate?.compare ?? mod.compare;
+  } catch (error) {
+    logger.error({ error }, "bcryptjs module not available");
+    throw new Error("bcryptjs_not_available");
+  }
+
+  if (typeof compare !== "function") {
+    logger.error("bcryptjs compare function missing");
+    throw new Error("bcryptjs_compare_missing");
+  }
+
+  cachedBcryptCompare = async (data: string, encrypted: string) => {
+    const result = compare!(data, encrypted);
+    return typeof result === "boolean" ? result : await result;
+  };
+
+  return cachedBcryptCompare;
+}
+
+async function verifyPassword(
+  passwordHash: string,
+  password: string,
+  logger: FastifyBaseLogger,
+): Promise<boolean> {
+  if (passwordHash.startsWith("$argon2")) {
+    return argon2.verify(passwordHash, password);
+  }
+
+  if (/^\$2[aby]\$/.test(passwordHash)) {
+    const compare = await loadBcryptCompare(logger);
+    return compare(password, passwordHash);
+  }
+
+  logger.error({ passwordHash }, "unsupported password hash algorithm");
+  throw new Error("unsupported_hash_algorithm");
+}
 
 const Register = z.object({
   email: z.string().email(),
@@ -112,13 +163,7 @@ const authRoutes: FastifyPluginAsync = async (app) => {
 
     let ok = false;
     try {
-      if (user.passwordHash.startsWith("$argon2")) {
-        ok = await argon2.verify(user.passwordHash, password);
-      } else if (/^\$2[aby]\$/.test(user.passwordHash)) {
-        ok = await bcrypt.compare(password, user.passwordHash);
-      } else {
-        throw new Error("unsupported_hash_algorithm");
-      }
+      ok = await verifyPassword(user.passwordHash, password, req.log);
     } catch (error) {
       req.log.error({ userId: user.id, error }, "login password verify failed");
       return reply
