@@ -21,8 +21,10 @@ RETURNS TABLE (
     username TEXT,
     role public."Role",
     "createdAt" TIMESTAMPTZ
-) AS
-$$
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 DECLARE
     email_lc TEXT;
     username_clean TEXT;
@@ -88,8 +90,9 @@ BEGIN
         inserted_user.username,
         inserted_user.role,
         inserted_user."createdAt";
+    RETURN;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 COMMENT ON FUNCTION public.register_user(TEXT, TEXT, TEXT, public."Role")
     IS 'Registriert einen neuen Benutzer mit Validierungen, bcrypt-Hashing und normalisierten Werten.';
@@ -104,8 +107,10 @@ RETURNS TABLE (
     email TEXT,
     username TEXT,
     role public."Role"
-) AS
-$$
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
 DECLARE
     lookup_value TEXT;
     user_row public."User"%ROWTYPE;
@@ -136,18 +141,19 @@ BEGIN
         user_row.email,
         user_row.username,
         user_row.role;
+    RETURN;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 COMMENT ON FUNCTION public.authenticate_user(TEXT, TEXT)
     IS 'Validiert die Zugangsdaten anhand von Email oder Username und gibt Kernattribute zurück.';
 
 
 CREATE UNIQUE INDEX IF NOT EXISTS "User_email_lower_key"
-    ON public."User" (lower(email));
+    ON public."User" ((lower(email)));
 
 CREATE UNIQUE INDEX IF NOT EXISTS "User_username_lower_key"
-    ON public."User" (lower(username));
+    ON public."User" ((lower(username)));
 
 -- Hinweis: Falls bereits UNIQUE Constraints auf email/username bestehen, bleiben diese erhalten.
 --          Die zusätzlichen Indizes erzwingen effektive case-insensitive Eindeutigkeit.
