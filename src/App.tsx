@@ -12,7 +12,6 @@ import Login from "@/routes/Auth/Login";
 import Register from "@/routes/Auth/Register";
 import { useUiStore } from "@/store/uiStore";
 import { usePresenceSubscription } from "@/lib/realtime/presence";
-import { useChatStore } from "@/store/chatStore";
 
 const ThemeWatcher = () => {
   const theme = useUiStore((state) => state.theme);
@@ -45,10 +44,6 @@ const ThemeWatcher = () => {
 const App = () => {
   usePresenceSubscription();
   const location = useLocation();
-  const initChat = useChatStore((state) => state.init);
-  useEffect(() => {
-    void initChat();
-  }, [initChat]);
 
   return (
     <RootLayout>

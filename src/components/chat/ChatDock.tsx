@@ -6,11 +6,37 @@ import ChatMessageItem from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { useChatStore } from "@/store/chatStore";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { on, startMock, stopMock } from "@/lib/realtime/socketMock";
+import { mockApi } from "@/lib/api/mockApi";
 
 const ChatDock = () => {
   const [open, setOpen] = useState(true);
-  const messages = useChatStore((state) => state.messages);
+  const messages = useChatStore((state) => state.ordered());
+  const addMessage = useChatStore((state) => state.addMessage);
+  const addMessages = useChatStore((state) => state.addMessages);
+  const connect = useChatStore((state) => state.connect);
+  const disconnect = useChatStore((state) => state.disconnect);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const seededRef = useRef(false);
+
+  useEffect(() => {
+    if (seededRef.current) return;
+    seededRef.current = true;
+    void mockApi.getSystemMessages().then((seed) => {
+      addMessages(seed);
+    });
+  }, [addMessages]);
+
+  useEffect(() => {
+    startMock();
+    connect();
+    const offMsg = on("chat:message", (m) => addMessage(m));
+    return () => {
+      offMsg();
+      disconnect();
+      stopMock();
+    };
+  }, [addMessage, connect, disconnect]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -29,11 +55,21 @@ const ChatDock = () => {
             className="glass-panel flex h-[420px] flex-col rounded-2xl border border-border/60 bg-background/90 shadow-xl backdrop-blur"
           >
             <ChatHeader onMinimize={() => setOpen(false)} />
-            <ScrollArea className="flex-1 px-4 py-3">
-              <div className="space-y-3">
-                {messages.map((message) => (
-                  <ChatMessageItem key={message.id} message={message} />
-                ))}
+            <ScrollArea className="flex-1">
+              <div className="space-y-3 px-4 py-3">
+                <AnimatePresence initial={false}>
+                  {messages.map((message) => (
+                    <motion.div
+                      key={message.id}
+                      layout
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                    >
+                      <ChatMessageItem message={message} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
                 <div ref={bottomRef} />
               </div>
             </ScrollArea>

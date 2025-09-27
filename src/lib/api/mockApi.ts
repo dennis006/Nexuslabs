@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { newId } from "../utils/id";
 import type {
   Category,
   ChatMessage,
@@ -141,13 +142,13 @@ const stats: Stats = {
 
 const systemMessages: ChatMessage[] = [
   {
-    id: nanoid(),
+    id: newId("system"),
     text: "Patch 1.27 Notes sind jetzt live!",
     system: true,
     createdAt: nowIso()
   },
   {
-    id: nanoid(),
+    id: newId("system"),
     text: "Community Turnier startet heute um 20:00 Uhr.",
     system: true,
     createdAt: nowIso()
