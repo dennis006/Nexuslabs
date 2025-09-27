@@ -26,23 +26,22 @@ type RefreshResponse = {
 type FetchInput = Parameters<typeof fetch>[0];
 type FetchInit = Parameters<typeof fetch>[1];
 
-async function parseJson<T>(response: Response, errorKey: string): Promise<T> {
-  const text = await response.text();
-  let payload: unknown;
-
+async function jsonOrThrow<T = unknown>(res: Response): Promise<T> {
+  let payload: unknown = null;
   try {
-    payload = text ? JSON.parse(text) : null;
+    payload = await res.json();
   } catch {
     payload = null;
   }
 
-  if (!response.ok) {
-    const detail =
-      typeof payload === "object" && payload && "error" in payload
-        ? String((payload as { error?: unknown }).error)
-        : errorKey;
-    const error = new Error(detail);
-    (error as Error & { status?: number }).status = response.status;
+  if (!res.ok) {
+    const data = payload as { message?: unknown; error?: unknown } | null;
+    const message =
+      (typeof data?.message === "string" && data.message) ||
+      (typeof data?.error === "string" && data.error) ||
+      `HTTP ${res.status}`;
+    const error = new Error(message);
+    (error as Error & { status?: number }).status = res.status;
     throw error;
   }
 
@@ -56,7 +55,7 @@ export async function register(data: { email: string; username: string; password
     credentials: "include",
     body: JSON.stringify(data)
   });
-  return parseJson<AuthResponse>(response, "register_failed");
+  return jsonOrThrow<AuthResponse>(response);
 }
 
 export async function login(data: { emailOrUsername: string; password: string }) {
@@ -66,7 +65,7 @@ export async function login(data: { emailOrUsername: string; password: string })
     credentials: "include",
     body: JSON.stringify(data)
   });
-  return parseJson<AuthResponse>(response, "login_failed");
+  return jsonOrThrow<AuthResponse>(response);
 }
 
 export async function me(accessToken: string) {
@@ -74,7 +73,7 @@ export async function me(accessToken: string) {
     headers: { Authorization: `Bearer ${accessToken}` },
     credentials: "include"
   });
-  return parseJson<MeResponse>(response, "me_failed");
+  return jsonOrThrow<MeResponse>(response);
 }
 
 export async function refresh() {
@@ -85,7 +84,7 @@ export async function refresh() {
   if (response.status === 401) {
     return null;
   }
-  return parseJson<RefreshResponse>(response, "refresh_failed");
+  return jsonOrThrow<RefreshResponse>(response);
 }
 
 export async function logout() {
@@ -127,5 +126,5 @@ export async function fetchWithAuth(input: FetchInput, init: FetchInit = {}) {
     }
   }
 
-  return parseJson(response, "request_failed");
+  return jsonOrThrow(response);
 }

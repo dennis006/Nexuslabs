@@ -7,6 +7,7 @@ import { env } from "./env";
 import dbPlugin from "./plugins/db";
 import authRoutes from "./routes/auth";
 import usersRoutes from "./routes/users";
+import { errorHandler } from "./errors";
 
 type JwtInstance = {
   sign: (payload: Record<string, unknown>, options?: Record<string, unknown>) => string;
@@ -56,6 +57,8 @@ const main = async () => {
 
   await app.register(authRoutes, { prefix: "/auth" });
   await app.register(usersRoutes, { prefix: "/users" });
+
+  app.setErrorHandler(errorHandler);
 
   app.get("/health", async () => ({ ok: true }));
 
