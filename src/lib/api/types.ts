@@ -7,6 +7,31 @@ export interface User {
   createdAt: string;
 }
 
+export interface LastPost {
+  id: ID;
+  threadTitle: string;
+  author: { id: ID; name: string; avatarUrl?: string };
+  createdAt: string;
+}
+
+export interface ForumNode {
+  id: ID;
+  emoji?: string;
+  icon?: string;
+  title: string;
+  description?: string;
+  posts: number;
+  topics?: number;
+  lastPost?: LastPost;
+  children?: ForumNode[];
+}
+
+export interface ForumSection {
+  id: ID;
+  title: string;
+  forums: ForumNode[];
+}
+
 export interface SubCategory {
   id: ID;
   name: string;

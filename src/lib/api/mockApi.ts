@@ -4,6 +4,8 @@ import type {
   Category,
   CategoryFilter,
   ChatMessage,
+  ForumNode,
+  ForumSection,
   PaginatedResponse,
   Post,
   Stats,
@@ -48,6 +50,237 @@ const users: User[] = Array.from({ length: 12 }).map((_, idx) => ({
   avatarUrl: `https://i.pravatar.cc/150?img=${idx + 12}`,
   createdAt: new Date(Date.now() - idx * 3600 * 24 * 1000).toISOString()
 }));
+
+const makeLastPost = (id: string, threadTitle: string, userIndex: number, minutesAgo: number) => {
+  const author = users[userIndex % users.length];
+  return {
+    id,
+    threadTitle,
+    author: {
+      id: author.id,
+      name: author.name,
+      avatarUrl: author.avatarUrl
+    },
+    createdAt: new Date(Date.now() - minutesAgo * 60 * 1000).toISOString()
+  };
+};
+
+const forumBoard: ForumSection[] = [
+  {
+    id: "section-command",
+    title: "Command Center",
+    forums: [
+      {
+        id: "forum-briefings",
+        emoji: "🛰️",
+        title: "Signal Uplink",
+        description: "Daily drops of industry intel, patch alerts and dev diaries.",
+        posts: 1458,
+        topics: 238,
+        lastPost: makeLastPost("lp-briefings", "Patch 12.8: Photon Siege Notes", 1, 18),
+        children: [
+          { id: "sub-briefings-1", title: "Patch Radar", posts: 86 },
+          { id: "sub-briefings-2", title: "Dev Responses", posts: 42 },
+          { id: "sub-briefings-3", title: "Event Alerts", posts: 37 }
+        ]
+      },
+      {
+        id: "forum-releases",
+        icon: "Rocket",
+        title: "Launch Hangar",
+        description: "Track AAA rollouts, early access windows and roadmap reveals.",
+        posts: 987,
+        topics: 164,
+        lastPost: makeLastPost("lp-releases", "Echo Drift releasing on May 28", 4, 65),
+        children: [
+          { id: "sub-releases-1", title: "AAA", posts: 58 },
+          { id: "sub-releases-2", title: "Indie Signals", posts: 44 },
+          { id: "sub-releases-3", title: "Roadmaps", posts: 33 }
+        ]
+      },
+      {
+        id: "forum-deepdives",
+        icon: "Satellite",
+        title: "Deep Scan Reports",
+        description: "Long-form breakdowns, metrics and meta analyses from the lab.",
+        posts: 1214,
+        topics: 192,
+        lastPost: makeLastPost("lp-deepdives", "Telemetry on VR retention", 6, 142),
+        children: [
+          { id: "sub-deepdives-1", title: "Analytics", posts: 71 },
+          { id: "sub-deepdives-2", title: "Design Diaries", posts: 29 },
+          { id: "sub-deepdives-3", title: "Research", posts: 40 },
+          { id: "sub-deepdives-4", title: "Field Notes", posts: 18 }
+        ]
+      },
+      {
+        id: "forum-market",
+        emoji: "🧠",
+        title: "Market Signals",
+        description: "Benchmarks, funding rounds and strategic plays from publishers.",
+        posts: 764,
+        topics: 118,
+        lastPost: makeLastPost("lp-market", "HoloWorks closes Series B", 8, 220),
+        children: [
+          { id: "sub-market-1", title: "Investments", posts: 32 },
+          { id: "sub-market-2", title: "Partnerships", posts: 27 },
+          { id: "sub-market-3", title: "Hiring", posts: 24 }
+        ]
+      }
+    ]
+  },
+  {
+    id: "section-competitive",
+    title: "Competitive Operations",
+    forums: [
+      {
+        id: "forum-strats",
+        icon: "Sword",
+        title: "Tactics Lab",
+        description: "Playbook swaps, comp science and counter-strat breakdowns.",
+        posts: 1890,
+        topics: 256,
+        lastPost: makeLastPost("lp-strats", "Countering aerial rush lanes", 2, 44),
+        children: [
+          { id: "sub-strats-1", title: "Meta Watch", posts: 74 },
+          { id: "sub-strats-2", title: "Scrim Logs", posts: 61 },
+          { id: "sub-strats-3", title: "Coach Calls", posts: 35 },
+          { id: "sub-strats-4", title: "Theorycraft", posts: 48 }
+        ]
+      },
+      {
+        id: "forum-tournaments",
+        icon: "Trophy",
+        title: "Tournament Ops",
+        description: "Bracket intel, LAN prep workflows and official rule updates.",
+        posts: 1126,
+        topics: 174,
+        lastPost: makeLastPost("lp-tournaments", "Nexus Masters qualifiers recap", 9, 16),
+        children: [
+          { id: "sub-tournaments-1", title: "Qualifier News", posts: 53 },
+          { id: "sub-tournaments-2", title: "LAN Logistics", posts: 41 },
+          { id: "sub-tournaments-3", title: "Match VODs", posts: 46 }
+        ]
+      },
+      {
+        id: "forum-loadouts",
+        emoji: "🎯",
+        title: "Gear Vault",
+        description: "Controller tuning, PC builds and performance-optimised presets.",
+        posts: 1387,
+        topics: 210,
+        lastPost: makeLastPost("lp-loadouts", "Updated gyro curves for Helix", 10, 72),
+        children: [
+          { id: "sub-loadouts-1", title: "PC", posts: 88 },
+          { id: "sub-loadouts-2", title: "Console", posts: 57 },
+          { id: "sub-loadouts-3", title: "Mobile", posts: 28 },
+          { id: "sub-loadouts-4", title: "Peripherals", posts: 39 }
+        ]
+      },
+      {
+        id: "forum-community",
+        icon: "Users",
+        title: "Crew Briefing",
+        description: "Clan recruitment, scrim finders and looking-for-group beacons.",
+        posts: 842,
+        topics: 129,
+        lastPost: makeLastPost("lp-community", "Looking for flex support tonight", 3, 8),
+        children: [
+          { id: "sub-community-1", title: "Recruitment", posts: 48 },
+          { id: "sub-community-2", title: "LFG", posts: 57 },
+          { id: "sub-community-3", title: "Rosters", posts: 31 }
+        ]
+      }
+    ]
+  },
+  {
+    id: "section-creative",
+    title: "Creative Labs",
+    forums: [
+      {
+        id: "forum-prototype",
+        icon: "Beaker",
+        title: "Prototype Lab",
+        description: "Share greybox builds, systems experiments and feedback requests.",
+        posts: 658,
+        topics: 97,
+        lastPost: makeLastPost("lp-prototype", "New movement sandbox build", 5, 33),
+        children: [
+          { id: "sub-prototype-1", title: "Mechanics", posts: 28 },
+          { id: "sub-prototype-2", title: "Level Design", posts: 35 },
+          { id: "sub-prototype-3", title: "AI", posts: 22 }
+        ]
+      },
+      {
+        id: "forum-art",
+        emoji: "🎨",
+        title: "Visual Forge",
+        description: "Concept art jams, shader breakdowns and asset polish sessions.",
+        posts: 1542,
+        topics: 201,
+        lastPost: makeLastPost("lp-art", "Photon Knight key art WIP", 7, 25),
+        children: [
+          { id: "sub-art-1", title: "Concept", posts: 61 },
+          { id: "sub-art-2", title: "3D", posts: 47 },
+          { id: "sub-art-3", title: "UI", posts: 32 },
+          { id: "sub-art-4", title: "Animation", posts: 29 }
+        ]
+      },
+      {
+        id: "forum-audio",
+        icon: "AudioWaveform",
+        title: "Sound Lab",
+        description: "Sound design sessions, adaptive scoring and VO pipelines.",
+        posts: 512,
+        topics: 83,
+        lastPost: makeLastPost("lp-audio", "Layered ambience kit release", 11, 95),
+        children: [
+          { id: "sub-audio-1", title: "SFX", posts: 26 },
+          { id: "sub-audio-2", title: "Music", posts: 31 },
+          { id: "sub-audio-3", title: "VO", posts: 18 }
+        ]
+      },
+      {
+        id: "forum-code",
+        icon: "Code2",
+        title: "Engine Room",
+        description: "Optimization wins, tooling scripts and pipeline automation.",
+        posts: 1783,
+        topics: 266,
+        lastPost: makeLastPost("lp-code", "Modular input graph refactor", 0, 54),
+        children: [
+          { id: "sub-code-1", title: "Unity", posts: 65 },
+          { id: "sub-code-2", title: "Unreal", posts: 72 },
+          { id: "sub-code-3", title: "Custom", posts: 44 },
+          { id: "sub-code-4", title: "Tooling", posts: 39 }
+        ]
+      }
+    ]
+  }
+];
+
+const cloneForumNode = (node: ForumNode): ForumNode => ({
+  ...node,
+  lastPost: node.lastPost
+    ? {
+        ...node.lastPost,
+        author: { ...node.lastPost.author }
+      }
+    : undefined,
+  children: node.children?.map(cloneForumNode)
+});
+
+const cloneForumBoard = (): ForumSection[] =>
+  forumBoard.map((section) => ({
+    ...section,
+    forums: section.forums.map(cloneForumNode)
+  }));
+
+const fetchForumBoard = async (): Promise<ForumSection[]> => {
+  await wait();
+  maybeFail();
+  return cloneForumBoard();
+};
 
 const categories: Category[] = [
   {
@@ -410,6 +643,9 @@ export const mockApi = {
     maybeFail();
     return posts.filter((post) => post.threadId === threadId);
   },
+  async getForumBoard(): Promise<ForumSection[]> {
+    return fetchForumBoard();
+  },
   async createThread(data: Pick<ThreadWithMeta, "categoryId" | "title" | "tags"> & { body: string; authorId: string }): Promise<ThreadWithMeta> {
     await wait();
     maybeFail();
@@ -472,5 +708,9 @@ export const mockApi = {
     return users;
   }
 };
+
+export async function getForumBoard(): Promise<ForumSection[]> {
+  return fetchForumBoard();
+}
 
 export type MockApi = typeof mockApi;
