@@ -24,6 +24,7 @@
   --input: 217 33% 18%;
   --ring: 184 100% 50%;
   --radius: 0.95rem;
+  --fs-body: clamp(0.98rem, 0.25vw + 0.92rem, 1.05rem);
   --step-0: clamp(0.95rem, 0.25vw + 0.9rem, 1.05rem);
   --step-1: clamp(1.15rem, 0.5vw + 1rem, 1.35rem);
   --step-2: clamp(1.35rem, 0.7vw + 1.1rem, 1.6rem);
@@ -56,7 +57,7 @@
 body {
   @apply bg-background text-foreground antialiased;
   min-height: 100vh;
-  font-size: var(--step-0);
+  font-size: var(--fs-body);
   line-height: 1.65;
   letter-spacing: 0.01em;
   background-image: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.2), transparent 45%),
@@ -67,8 +68,7 @@ body {
 
 h1,
 h2,
-h3,
-h4 {
+h3 {
   letter-spacing: -0.015em;
 }
 
