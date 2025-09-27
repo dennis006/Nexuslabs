@@ -1,9 +1,16 @@
 import type { ChatMessage } from "@/lib/api/types";
 import { newId } from "@/lib/utils/id";
 
-type Handler = (payload: any) => void;
+type PresencePayload = { online: number };
 
-const handlers: Record<string, Set<Handler>> = {
+type EventMap = {
+  "chat:message": ChatMessage;
+  "presence:update": PresencePayload;
+};
+
+type Handler<K extends keyof EventMap> = (payload: EventMap[K]) => void;
+
+const handlers: { [K in keyof EventMap]: Set<Handler<K>> } = {
   "chat:message": new Set(),
   "presence:update": new Set(),
 };
@@ -12,13 +19,15 @@ let started = false;
 let chatInterval: number | undefined;
 let presenceInterval: number | undefined;
 
-export function on(event: keyof typeof handlers, cb: Handler) {
-  handlers[event].add(cb);
-  return () => handlers[event].delete(cb);
+export function on<K extends keyof EventMap>(event: K, cb: Handler<K>) {
+  const set = handlers[event] as Set<Handler<K>>;
+  set.add(cb);
+  return () => set.delete(cb);
 }
 
-function emit(event: keyof typeof handlers, payload: any) {
-  handlers[event].forEach((cb) => cb(payload));
+function emit<K extends keyof EventMap>(event: K, payload: EventMap[K]) {
+  const set = handlers[event] as Set<Handler<K>>;
+  set.forEach((cb) => cb(payload));
 }
 
 export function startMock() {
