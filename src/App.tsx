@@ -16,6 +16,7 @@ import { useChatStore } from "@/store/chatStore";
 
 const ThemeWatcher = () => {
   const theme = useUiStore((state) => state.theme);
+  const density = useUiStore((state) => state.density);
   useEffect(() => {
     const root = document.documentElement;
     root.classList.remove("light", "dark");
@@ -23,11 +24,21 @@ const ThemeWatcher = () => {
     localStorage.setItem("nexuslabs-theme", theme);
   }, [theme]);
   useEffect(() => {
+    document.documentElement.dataset.density = density;
+  }, [density]);
+  useEffect(() => {
     const stored = localStorage.getItem("nexuslabs-theme") as "light" | "dark" | null;
     if (stored) {
       useUiStore.setState({ theme: stored });
     }
+    const storedDensity = localStorage.getItem("nexuslabs-density") as "comfortable" | "compact" | null;
+    if (storedDensity) {
+      useUiStore.setState({ density: storedDensity });
+    }
   }, []);
+  useEffect(() => {
+    localStorage.setItem("nexuslabs-density", density);
+  }, [density]);
   return null;
 };
 

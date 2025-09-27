@@ -2,9 +2,11 @@ import { useEffect } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// Register once globally
-if (typeof window !== "undefined" && !gsap.core.globals()["ScrollTrigger"]) {
+let scrollTriggerRegistered = false;
+
+if (typeof window !== "undefined" && !scrollTriggerRegistered) {
   gsap.registerPlugin(ScrollTrigger);
+  scrollTriggerRegistered = true;
 }
 
 export const useGsapScrollReveal = (selector: string) => {

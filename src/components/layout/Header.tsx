@@ -19,10 +19,12 @@ const Header = () => {
   const location = useLocation();
   const toggleLeft = useUiStore((state) => state.toggleSidebarLeft);
   const toggleRight = useUiStore((state) => state.toggleSidebarRight);
+  const density = useUiStore((state) => state.density);
+  const toggleDensity = useUiStore((state) => state.toggleDensity);
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="mx-auto flex w-full max-w-6xl items-center gap-4 px-4 py-3">
+      <div className="mx-auto flex w-full max-w-screen-2xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <button
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-border/60 bg-background/60 text-muted-foreground lg:hidden"
           onClick={() => toggleLeft(true)}
@@ -52,10 +54,10 @@ const Header = () => {
                 Gast
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>Willkommen!</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/login")}> 
+              <DropdownMenuItem onClick={() => navigate("/login")}>
                 <LogIn className="mr-2 h-4 w-4" /> Login
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/register")}>
@@ -66,6 +68,11 @@ const Header = () => {
               <DropdownMenuItem onClick={() => toggleRight(true)}>
                 <Sparkles className="mr-2 h-4 w-4" />
                 Trends anzeigen
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={toggleDensity}>
+                <MessageSquarePlus className="mr-2 h-4 w-4" />
+                Ansicht: {density === "comfortable" ? "Komfort" : "Kompakt"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
