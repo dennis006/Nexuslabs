@@ -8,6 +8,7 @@ import Forum from "@/routes/Forum";
 import Category from "@/routes/Category";
 import Thread from "@/routes/Thread";
 import CreatePost from "@/routes/CreatePost";
+import Forums from "@/routes/Forums";
 import Login from "@/routes/Auth/Login";
 import Register from "@/routes/Auth/Register";
 import { useUiStore } from "@/store/uiStore";
@@ -52,6 +53,7 @@ const App = () => {
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Landing />} />
           <Route path="/forum" element={<Forum />} />
+          <Route path="/forums" element={<Forums />} />
           <Route path="/forum/:categoryId" element={<Category />} />
           <Route path="/thread/:threadId" element={<Thread />} />
           <Route path="/create" element={<CreatePost />} />
