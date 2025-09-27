@@ -4,7 +4,6 @@ import { formatRelativeTime } from "@/lib/utils/time";
 import type { ThreadWithMeta } from "@/lib/api/types";
 import { MessageSquare, Eye, Flame } from "lucide-react";
 import { useUiStore } from "@/store/uiStore";
-import { cn } from "@/lib/utils/cn";
 
 const ThreadItem = ({ thread }: { thread: ThreadWithMeta }) => {
   const density = useUiStore((state) => state.density);
@@ -12,21 +11,19 @@ const ThreadItem = ({ thread }: { thread: ThreadWithMeta }) => {
   return (
     <Link
       to={`/thread/${thread.id}`}
-      className={cn(
-        "group block px-6 py-6 transition hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary",
-        density === "compact" && "px-4 py-4"
-      )}
+      data-density={density}
+      className="group block rounded-none px-5 py-5 transition hover:bg-primary/5 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary md:px-6 md:py-6 data-[density=compact]:px-4 data-[density=compact]:py-4"
     >
-      <div className="flex flex-col gap-3">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-2">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+          <div className="space-y-3">
             <Badge variant="accent" className="rounded-full px-2.5 py-0.5 text-xs capitalize">
               {thread.tags?.[0] ?? "Thread"}
             </Badge>
-            <h3 className="text-lg font-semibold tracking-tight text-foreground transition group-hover:text-primary md:text-xl">
+            <h3 className="text-lg font-semibold tracking-tight text-foreground transition group-hover:text-primary md:text-xl 2xl:text-[1.35rem]">
               {thread.title}
             </h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               Zuletzt von <span className="font-semibold">{thread.lastPosterId}</span> kommentiert • {formatRelativeTime(thread.lastPostAt)}
             </p>
           </div>
