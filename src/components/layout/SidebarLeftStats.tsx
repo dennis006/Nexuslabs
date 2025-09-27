@@ -34,11 +34,11 @@ const SidebarLeftStats = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const density = useUiStore((state) => state.density);
+
   if (loading && !stats) return <LoadingSkeleton />;
   if (error) return <ErrorState message={error} onRetry={load} />;
   if (!stats) return null;
-
-  const density = useUiStore((state) => state.density);
 
   return (
     <aside className="space-y-4" data-density={density}>
