@@ -1,4 +1,12 @@
-import { nanoid } from "nanoid";
+let msgCounter = 0;
+
+const generateId = () => {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  msgCounter += 1;
+  return `msg_${Date.now()}_${msgCounter}`;
+};
 
 type Listener<T> = (payload: T) => void;
 
@@ -18,21 +26,24 @@ class SocketMock {
   private presenceInterval?: ReturnType<typeof setInterval>;
   private chatInterval?: ReturnType<typeof setInterval>;
   private connections = 0;
+  private started = false;
 
   connect() {
     this.connections += 1;
-    if (this.connections > 1) return;
+    if (this.started) return;
+    this.started = true;
     this.startPresence();
     this.startChat();
   }
 
   disconnect() {
     this.connections = Math.max(0, this.connections - 1);
-    if (this.connections === 0) {
+    if (this.connections === 0 && this.started) {
       if (this.presenceInterval) clearInterval(this.presenceInterval);
       if (this.chatInterval) clearInterval(this.chatInterval);
       this.presenceInterval = undefined;
       this.chatInterval = undefined;
+      this.started = false;
     }
   }
 
@@ -42,7 +53,10 @@ class SocketMock {
   }
 
   off<K extends keyof EventMap>(event: K, cb: Listener<EventMap[K]>) {
-    this.listeners[event] = (this.listeners[event] || []).filter((listener) => listener !== cb);
+    const listeners = this.listeners[event];
+    if (!listeners) return;
+    const filtered = listeners.filter((listener) => listener !== cb);
+    this.listeners[event] = (filtered.length > 0 ? filtered : undefined) as typeof this.listeners[K];
   }
 
   emit<K extends keyof EventMap>(event: K, payload: EventMap[K]) {
@@ -68,7 +82,7 @@ class SocketMock {
     this.chatInterval = setInterval(() => {
       const message = sampleMessages[Math.floor(Math.random() * sampleMessages.length)];
       this.emit("chat:message", {
-        id: nanoid(),
+        id: generateId(),
         text: message,
         system: Math.random() > 0.75,
         createdAt: new Date().toISOString()
