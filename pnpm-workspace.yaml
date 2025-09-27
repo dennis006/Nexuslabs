@@ -1,0 +1,9 @@
+packages:
+  - apps/*
+onlyBuiltDependencies:
+  - '@prisma/engines'
+  - argon2
+  - esbuild
+  - prisma
+ignoredBuiltDependencies:
+  - '@prisma/client'

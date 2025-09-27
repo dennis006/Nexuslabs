@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
 import { useForumStore } from "@/store/forumStore";
 import LoadingSkeleton from "@/components/common/LoadingSkeleton";
@@ -8,7 +8,7 @@ import ThreadItem from "@/components/forum/ThreadItem";
 import EmptyState from "@/components/forum/EmptyState";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useUser } from "@/store/userStore";
+import { useUserStore } from "@/store/userStore";
 
 const sortOptions = [
   { value: "new", label: "Neueste" },
@@ -20,10 +20,11 @@ const sortOptions = [
 const Category = () => {
   const { categoryId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [sort, setSort] = useState<(typeof sortOptions)[number]["value"]>("new");
   const { categories, threads, loadingThreads, error, fetchCategories, fetchThreads } = useForumStore();
-  const user = useUser((state) => state.user);
-  const canPost = user?.role === "member" || user?.role === "admin";
+  const user = useUserStore((state) => state.user);
+  const canPost = Boolean(user);
 
   const category = useMemo(() => categories.find((c) => c.id === categoryId), [categories, categoryId]);
 
@@ -53,10 +54,10 @@ const Category = () => {
 
             <Button
               className="rounded-xl"
-              disabled={!canPost}
-              onClick={() => (canPost ? navigate(`/forum/${categoryId}/create`) : navigate("/login"))}
+              variant={canPost ? "default" : "outline"}
+              onClick={() => (canPost ? navigate(`/forum/${categoryId}/create`) : navigate("/login", { state: { from: location.pathname } }))}
             >
-              Neuer Thread
+              {canPost ? "Neuer Thread" : "Login erforderlich"}
             </Button>
           </div>
 

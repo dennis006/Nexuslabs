@@ -1,24 +1,31 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
 import { useForumStore } from "@/store/forumStore";
 import Composer from "@/components/forum/Composer";
 import type { Category } from "@/lib/api/types";
 import { toast } from "sonner";
-import { useUser } from "@/store/userStore";
+import { useUserStore } from "@/store/userStore";
 
 const CreatePost = () => {
   const { categoryId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { categories, fetchCategories, createThread } = useForumStore();
-  const user = useUser((state) => state.user);
-  const isAdmin = user?.role === "admin";
+  const user = useUserStore((state) => state.user);
+  const isAdmin = user?.role === "ADMIN";
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>(categoryId ?? undefined);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!categories.length) void fetchCategories();
   }, [categories.length, fetchCategories]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/login", { replace: true, state: { from: location.pathname } });
+    }
+  }, [user, navigate, location.pathname]);
 
   useEffect(() => {
     if (!categoryId) {
@@ -35,6 +42,10 @@ const CreatePost = () => {
 
   const handleSubmit = async ({ title, body }: { title?: string; body: string }) => {
     const targetCategory = selectedCategory ?? categoryId;
+    if (!user) {
+      toast.error("Bitte logge dich ein.");
+      return;
+    }
     if (!title || !targetCategory) {
       toast.error("Bitte Kategorie und Titel wählen");
       return;
@@ -46,7 +57,7 @@ const CreatePost = () => {
         title,
         tags: ["Community"],
         body,
-        authorId: "user-1"
+        authorId: user.id
       });
       toast.success("Thread veröffentlicht");
     } catch (error) {

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { Toaster } from "sonner";
 import RootLayout from "@/components/layout/RootLayout";
@@ -13,6 +13,8 @@ import Login from "@/routes/Auth/Login";
 import Register from "@/routes/Auth/Register";
 import { useUiStore } from "@/store/uiStore";
 import { usePresenceSubscription } from "@/lib/realtime/presence";
+import { useUserStore } from "@/store/userStore";
+import { me, refresh } from "@/lib/api/authApi";
 
 const ThemeWatcher = () => {
   const theme = useUiStore((state) => state.theme);
@@ -42,6 +44,48 @@ const ThemeWatcher = () => {
   return null;
 };
 
+const SessionManager = () => {
+  const user = useUserStore((state) => state.user);
+  const setSession = useUserStore((state) => state.setSession);
+  const clear = useUserStore((state) => state.clear);
+  const [bootstrapped, setBootstrapped] = useState(false);
+
+  useEffect(() => {
+    if (user && !bootstrapped) {
+      setBootstrapped(true);
+    }
+  }, [user, bootstrapped]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (user || bootstrapped) {
+      return;
+    }
+
+    (async () => {
+      try {
+        const refreshed = await refresh();
+        const profile = await me(refreshed.accessToken);
+        if (cancelled) return;
+        setSession(profile.user, refreshed.accessToken);
+      } catch {
+        if (cancelled) return;
+        clear();
+      } finally {
+        if (!cancelled) {
+          setBootstrapped(true);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user, bootstrapped, setSession, clear]);
+
+  return null;
+};
+
 const App = () => {
   usePresenceSubscription();
   const location = useLocation();
@@ -49,6 +93,7 @@ const App = () => {
   return (
     <RootLayout>
       <ThemeWatcher />
+      <SessionManager />
       <AnimatedRoutes location={location}>
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<Landing />} />

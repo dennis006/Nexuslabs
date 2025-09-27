@@ -1,6 +1,17 @@
-# NexusLabs – Gaming Forum
+# NexusLabs – Gaming Forum & API
 
-Ein modernes Gaming-Forum als Single-Page-Application auf Basis von **Vite**, **React 18**, **TypeScript** und **Tailwind CSS**. Das Projekt kombiniert klassische Forum-UX mit Echtzeit-Demo-Features, Animationslayern und einem Dock-Chat.
+Ein modernes Gaming-Forum als Single-Page-Application auf Basis von **Vite**, **React 18**, **TypeScript** und **Tailwind CSS**. Ergänzt wird das Frontend jetzt um einen eigenständigen **Fastify + Prisma API-Server** mit PostgreSQL-gestützter Benutzerregistrierung und Login. Das Projekt kombiniert klassische Forum-UX mit Echtzeit-Demo-Features, Animationslayern, einem Dock-Chat sowie einer echten Authentifizierungskette.
+
+## Monorepo Struktur
+
+```
+nexuslabs/
+  apps/
+    api/   # Fastify + Prisma Server (JWT + Cookies)
+    web/   # Vite + React Frontend
+  pnpm-workspace.yaml
+  package.json          # Workspace-Skripte
+```
 
 ## Features
 
@@ -16,33 +27,50 @@ Ein modernes Gaming-Forum als Single-Page-Application auf Basis von **Vite**, **
 ## Getting Started
 
 ```bash
+# Abhängigkeiten für alle Pakete installieren
 pnpm install
-pnpm dev
+
+# API-Server (Fastify) starten
+pnpm dev:api
+
+# Frontend (Vite) starten
+pnpm dev:web
 ```
 
-Weitere Skripte:
+### API (.env)
 
-- `pnpm build` – Production Build
-- `pnpm preview` – Vorschau des Builds
-- `pnpm lint` – ESLint Check
-- `pnpm format` – Prettier Formatierung
+1. `apps/api/.env.example` kopieren → `apps/api/.env`
+2. `DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` setzen.
+3. Migration anlegen (optional lokal): `pnpm --filter nexuslabs-api prisma:migrate`
+
+### Frontend (.env)
+
+1. `apps/web/.env.local` erstellen (siehe unten)
+2. Inhalt: `VITE_API_URL="http://localhost:5001"`
+
+Weitere Frontend-Skripte (`pnpm --filter nexuslabs-gaming-forum <script>`):
+
+- `build` – Production Build
+- `preview` – Vorschau des Builds
+- `lint` – ESLint Check
+- `format` – Prettier Formatierung
 
 ## Projektstruktur
 
 ```
-nexuslabs/
-  ├── src/
-  │   ├── routes/                 # Seiten & Router-Logik
-  │   ├── components/             # UI-Bausteine (layout, forum, chat, common, ui)
-  │   ├── store/                  # Zustand Stores (UI, Forum, Chat, Presence)
-  │   ├── lib/                    # Mock-API, Animation Helpers, Utils
-  │   ├── styles/                 # globale Styles & Tailwind
-  │   └── assets/                 # Logos & statische Assets
-  ├── tailwind.config.ts
-  ├── vite.config.ts
-  ├── tsconfig.json
-  ├── eslint.config.js
-  └── ...
+apps/
+  api/
+    src/
+      routes/              # Auth- und User-Endpunkte
+      plugins/             # Prisma-Anbindung
+      middlewares/         # Auth Guards
+    prisma/                # Prisma Schema & Migration
+  web/
+    src/
+      routes/              # Seiten & Router-Logik
+      components/          # UI-Bausteine (Layout, Forum, Chat, Common, UI)
+      store/               # Zustand Stores (UI, Forum, Chat, Presence, User)
+      lib/                 # API-Client, Mock-Services, Utils
 ```
 
 ## Mock Services & Realtime
