@@ -23,6 +23,9 @@ type RefreshResponse = {
   accessToken: string;
 };
 
+type FetchInput = Parameters<typeof fetch>[0];
+type FetchInit = Parameters<typeof fetch>[1];
+
 async function parseJson<T>(response: Response, errorKey: string): Promise<T> {
   const text = await response.text();
   let payload: unknown;
@@ -92,7 +95,7 @@ export async function logout() {
   });
 }
 
-export async function fetchWithAuth(input: RequestInfo | URL, init: RequestInit = {}) {
+export async function fetchWithAuth(input: FetchInput, init: FetchInit = {}) {
   const { accessToken, setAccessToken, clear } = useUserStore.getState();
 
   const execute = async (token?: string | null) => {
