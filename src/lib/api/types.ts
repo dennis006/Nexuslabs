@@ -7,6 +7,12 @@ export interface User {
   createdAt: string;
 }
 
+export interface SubCategory {
+  id: ID;
+  name: string;
+  threadCount: number;
+}
+
 export interface Category {
   id: ID;
   slug: string;
@@ -15,6 +21,16 @@ export interface Category {
   icon?: string;
   threadCount: number;
   postCount: number;
+  subcategories?: SubCategory[];
+}
+
+export interface CategoryFilter {
+  q?: string;
+  sort?: "name" | "threads" | "posts" | "new";
+  onlyNew?: boolean;
+  tag?: string;
+  page?: number;
+  pageSize?: number;
 }
 
 export interface Thread {
