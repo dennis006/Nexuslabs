@@ -40,7 +40,7 @@ pnpm dev:web
 ### API (.env)
 
 1. `apps/api/.env.example` kopieren → `apps/api/.env`
-2. `DATABASE_URL`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` setzen.
+2. `DATABASE_URL`, `JWT_ACCESS_SECRET` setzen (optional auch `JWT_REFRESH_SECRET`, gleicher Wert).
 3. Migration anlegen (optional lokal): `pnpm --filter nexuslabs-api prisma:migrate`
 
 ### Frontend (.env)

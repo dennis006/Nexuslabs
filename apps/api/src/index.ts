@@ -20,19 +20,11 @@ const main = async () => {
   });
 
   await app.register(cookie, {
-    hook: "onRequest"
+    hook: "onRequest",
   });
 
   await app.register(jwt, {
     secret: env.accessSecret,
-    sign: { expiresIn: "10m" },
-    decoratorName: "accessJwt",
-  });
-
-  await app.register(jwt, {
-    secret: env.refreshSecret,
-    sign: { expiresIn: "7d" },
-    decoratorName: "refreshJwt",
   });
 
   await app.register(dbPlugin);

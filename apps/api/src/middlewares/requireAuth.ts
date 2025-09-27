@@ -23,7 +23,7 @@ export const createRequireAuth = (app: FastifyInstance) => {
     }
 
     try {
-      const payload = app.accessJwt.verify(token) as { sub: string; role?: Role };
+      const payload = app.jwt.verify(token) as { sub: string; role?: Role };
       request.user = {
         id: payload.sub,
         role: payload.role ?? "MEMBER"
