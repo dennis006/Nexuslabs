@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { register } from "@/lib/api/authApi";
 import { useUserStore } from "@/store/userStore";
+import { USERNAME_PATTERN, USERNAME_TITLE } from "@/features/auth/validation";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -68,7 +69,8 @@ const Register = () => {
               onChange={(event) => setForm((prev) => ({ ...prev, username: event.target.value }))}
               minLength={3}
               maxLength={20}
-              pattern="[-A-Za-z0-9_]+"
+              pattern={USERNAME_PATTERN}
+              title={USERNAME_TITLE}
               required
               disabled={loading}
             />

@@ -36,11 +36,30 @@ const Landing = () => {
   useGsapScrollReveal("[data-animate-card]");
 
   useEffect(() => {
-    const fetchStats = async () => {
-      const data = await mockApi.getStats();
-      setStats(data);
+    let alive = true;
+    (async () => {
+      try {
+        const data = await mockApi.getStats();
+        if (alive) {
+          setStats(data);
+        }
+      } catch (e) {
+        console.warn("fetchStats failed", e);
+        if (alive) {
+          setStats({
+            usersTotal: 0,
+            usersOnline: 0,
+            categoriesTotal: 0,
+            threadsTotal: 0,
+            postsTotal: 0,
+            messagesTotal: 0
+          });
+        }
+      }
+    })();
+    return () => {
+      alive = false;
     };
-    void fetchStats();
   }, []);
 
   useEffect(() => {
