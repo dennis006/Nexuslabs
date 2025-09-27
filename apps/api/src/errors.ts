@@ -2,17 +2,7 @@ import { ZodError } from "zod";
 import { Prisma } from "@prisma/client";
 import type { FastifyError, FastifyReply, FastifyRequest } from "fastify";
 
-interface MappedError {
-  status: number;
-  code: string;
-  message: string;
-}
-
-function isFastifyError(err: unknown): err is FastifyError {
-  return typeof err === "object" && err !== null && "statusCode" in err;
-}
-
-export function mapError(err: unknown): MappedError {
+export function mapError(err: unknown) {
   let status = 500;
   let code = "INTERNAL_ERROR";
   let message = "Internal Server Error";
@@ -27,10 +17,13 @@ export function mapError(err: unknown): MappedError {
       code = "UNIQUE_CONSTRAINT";
       message = "Email oder Benutzername bereits vergeben";
     }
-  } else if (isFastifyError(err)) {
-    status = err.statusCode ?? status;
-    code = err.code ?? code;
-    message = err.message ?? message;
+  } else if (typeof err === "object" && err && "statusCode" in err) {
+    const fastifyErr = err as FastifyError;
+    status = fastifyErr.statusCode ?? status;
+    code = (fastifyErr as { code?: string }).code ?? code;
+    message = fastifyErr.message ?? message;
+  } else if (typeof err === "object" && err && "message" in err) {
+    message = (err as { message?: string }).message ?? message;
   }
 
   return { status, code, message };
@@ -38,8 +31,9 @@ export function mapError(err: unknown): MappedError {
 
 export function errorHandler(err: FastifyError, req: FastifyRequest, reply: FastifyReply) {
   const { status, code, message } = mapError(err);
+  const dbg = process.env.DEBUG_ERRORS === "1";
 
-  req.log.error({ err, code }, message);
+  req.log.error({ code, err: dbg ? err : undefined }, message);
 
   reply.code(status).send({ error: code, message });
 }

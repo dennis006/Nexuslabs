@@ -40,9 +40,7 @@ async function jsonOrThrow<T = unknown>(res: Response): Promise<T> {
       (typeof data?.message === "string" && data.message) ||
       (typeof data?.error === "string" && data.error) ||
       `HTTP ${res.status}`;
-    const error = new Error(message);
-    (error as Error & { status?: number }).status = res.status;
-    throw error;
+    throw new Error(message);
   }
 
   return payload as T;
