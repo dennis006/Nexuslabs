@@ -68,7 +68,7 @@ const Register = () => {
               onChange={(event) => setForm((prev) => ({ ...prev, username: event.target.value }))}
               minLength={3}
               maxLength={20}
-              pattern="^[a-zA-Z0-9_\\-]+$"
+              pattern="^[a-zA-Z0-9_-]+$"
               required
               disabled={loading}
             />

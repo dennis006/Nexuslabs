@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync, FastifyReply } from "fastify";
 import { z } from "zod";
 import argon2 from "argon2";
+import bcrypt from "bcryptjs";
 
 const RegisterSchema = z.object({
   email: z.string().email(),
@@ -18,6 +19,30 @@ const LoginSchema = z.object({
 });
 
 const authRoutes: FastifyPluginAsync = async (app) => {
+  const BCRYPT_PREFIXES = ["$2a$", "$2b$", "$2y$"];
+  const ARGON_PREFIX = "$argon2";
+  const BCRYPT_ROUNDS = 12;
+
+  const hashPassword = (password: string) => bcrypt.hash(password, BCRYPT_ROUNDS);
+
+  const verifyPassword = async (hash: string, password: string) => {
+    try {
+      if (BCRYPT_PREFIXES.some((prefix) => hash.startsWith(prefix))) {
+        return await bcrypt.compare(password, hash);
+      }
+
+      if (hash.startsWith(ARGON_PREFIX)) {
+        return await argon2.verify(hash, password);
+      }
+
+      app.log.warn({ hashPreview: hash.slice(0, 10) }, "Unsupported password hash format");
+      return false;
+    } catch (error) {
+      app.log.error({ err: error }, "Failed to verify password hash");
+      return false;
+    }
+  };
+
   function setRefreshToken(reply: FastifyReply, token: string) {
     reply.setCookie("refresh_token", token, {
       httpOnly: true,
@@ -51,7 +76,7 @@ const authRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(409).send({ error: "USER_EXISTS" });
     }
 
-    const hash = await argon2.hash(password);
+    const hash = await hashPassword(password);
 
     const user = await app.db.user.create({
       data: {
@@ -97,7 +122,7 @@ const authRoutes: FastifyPluginAsync = async (app) => {
       return reply.code(401).send({ error: "INVALID_CREDENTIALS" });
     }
 
-    const valid = await argon2.verify(user.passwordHash, password);
+    const valid = await verifyPassword(user.passwordHash, password);
     if (!valid) {
       return reply.code(401).send({ error: "INVALID_CREDENTIALS" });
     }
