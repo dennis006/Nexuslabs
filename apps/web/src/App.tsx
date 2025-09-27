@@ -13,7 +13,7 @@ import Login from "@/routes/Auth/Login";
 import Register from "@/routes/Auth/Register";
 import { useUiStore } from "@/store/uiStore";
 import { usePresenceSubscription } from "@/lib/realtime/presence";
-import { useUserStore } from "@/store/userStore";
+import { SESSION_STORAGE_KEY, useUserStore } from "@/store/userStore";
 import { me, refresh } from "@/lib/api/authApi";
 
 const ThemeWatcher = () => {
@@ -54,6 +54,14 @@ const SessionManager = () => {
       return;
     }
     triedRef.current = true;
+
+    if (typeof window !== "undefined") {
+      const hasStoredSession = window.localStorage.getItem(SESSION_STORAGE_KEY);
+      if (!hasStoredSession) {
+        clear();
+        return;
+      }
+    }
 
     let cancelled = false;
 
