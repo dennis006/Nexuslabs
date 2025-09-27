@@ -110,6 +110,14 @@ export interface PaginatedResponse<T> {
   total: number;
 }
 
+export interface PagedResponse<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  totalCount: number;
+  totalPages: number;
+}
+
 export interface ThreadWithMeta extends Thread {
   lastPostAt: string;
   lastPosterId: ID;

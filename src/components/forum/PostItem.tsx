@@ -11,7 +11,7 @@ interface PostItemProps {
 }
 
 const PostItem = ({ post, author, isOp }: PostItemProps) => (
-  <article className="space-y-3 rounded-2xl border border-border/60 bg-card/70 p-5">
+  <article className="space-y-3 rounded-2xl border border-border/60 bg-card/70 p-5 md:p-6">
     <header className="flex items-center gap-3">
       <Avatar className="h-10 w-10">
         <AvatarImage src={author?.avatarUrl} alt={author?.name} />

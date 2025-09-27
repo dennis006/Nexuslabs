@@ -7,6 +7,7 @@ import type {
   ForumNode,
   ForumSection,
   PaginatedResponse,
+  PagedResponse,
   Post,
   Stats,
   ThreadFilter,
@@ -638,10 +639,27 @@ export const mockApi = {
     maybeFail();
     return threadSeeds.find((thread) => thread.id === id);
   },
-  async getPosts(threadId: string): Promise<Post[]> {
+  async getPosts(threadId: string, page = 1, pageSize = 5): Promise<PagedResponse<Post>> {
     await wait();
     maybeFail();
-    return posts.filter((post) => post.threadId === threadId);
+    const threadPosts = posts
+      .filter((post) => post.threadId === threadId)
+      .sort(
+        (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    const totalCount = threadPosts.length;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const safePage = totalPages === 0 ? 1 : Math.min(Math.max(page, 1), totalPages);
+    const start = (safePage - 1) * pageSize;
+    const end = start + pageSize;
+
+    return {
+      items: threadPosts.slice(start, end),
+      page: safePage,
+      pageSize,
+      totalCount,
+      totalPages
+    } satisfies PagedResponse<Post>;
   },
   async getForumBoard(): Promise<ForumSection[]> {
     return fetchForumBoard();
@@ -674,18 +692,18 @@ export const mockApi = {
     stats.postsTotal += 1;
     return thread;
   },
-  async createPost(data: { threadId: string; body: string; authorId: string }): Promise<Post> {
+  async createPost(threadId: string, data: { authorId: string; content: string }): Promise<Post> {
     await wait();
     maybeFail();
     const post: Post = {
       id: nanoid(),
-      threadId: data.threadId,
+      threadId,
       authorId: data.authorId,
-      content: data.body,
+      content: data.content,
       createdAt: nowIso()
     };
     posts.push(post);
-    const thread = threadSeeds.find((t) => t.id === data.threadId);
+    const thread = threadSeeds.find((t) => t.id === threadId);
     if (thread) {
       thread.replies += 1;
       thread.lastPostAt = post.createdAt;
@@ -708,6 +726,9 @@ export const mockApi = {
     return users;
   }
 };
+
+export const getPosts = mockApi.getPosts;
+export const createPost = mockApi.createPost;
 
 export async function getForumBoard(): Promise<ForumSection[]> {
   return fetchForumBoard();
