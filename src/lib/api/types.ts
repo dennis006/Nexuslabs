@@ -1,0 +1,75 @@
+export type ID = string;
+
+export interface User {
+  id: ID;
+  name: string;
+  avatarUrl?: string;
+  createdAt: string;
+}
+
+export interface Category {
+  id: ID;
+  slug: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  threadCount: number;
+  postCount: number;
+}
+
+export interface Thread {
+  id: ID;
+  categoryId: ID;
+  title: string;
+  authorId: ID;
+  createdAt: string;
+  updatedAt: string;
+  views: number;
+  replies: number;
+  tags?: string[];
+}
+
+export interface Post {
+  id: ID;
+  threadId: ID;
+  authorId: ID;
+  content: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ChatMessage {
+  id: ID;
+  author?: Pick<User, "id" | "name" | "avatarUrl">;
+  text: string;
+  createdAt: string;
+  system?: boolean;
+}
+
+export interface Stats {
+  usersTotal: number;
+  usersOnline: number;
+  categoriesTotal: number;
+  threadsTotal: number;
+  postsTotal: number;
+  messagesTotal: number;
+}
+
+export interface ThreadFilter {
+  categoryId?: ID;
+  sort?: "new" | "top" | "active" | "unread" | "hottest" | "oldest";
+  page?: number;
+  pageSize?: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
+
+export interface ThreadWithMeta extends Thread {
+  lastPostAt: string;
+  lastPosterId: ID;
+}
