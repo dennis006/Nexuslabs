@@ -2,6 +2,7 @@ import { nanoid } from "nanoid";
 import { newId } from "../utils/id";
 import type {
   Category,
+  CategoryFilter,
   ChatMessage,
   PaginatedResponse,
   Post,
@@ -56,7 +57,16 @@ const categories: Category[] = [
     description: "Taktische Shooter, Loadouts & Aim-Training",
     icon: "crosshair",
     threadCount: 128,
-    postCount: 982
+    postCount: 982,
+    subcategories: [
+      { id: "sub-1", name: "Aim-Labs", threadCount: 32 },
+      { id: "sub-2", name: "Loadouts", threadCount: 44 },
+      { id: "sub-3", name: "Scrims", threadCount: 21 },
+      { id: "sub-4", name: "Ranked", threadCount: 18 },
+      { id: "sub-5", name: "Controller", threadCount: 9 },
+      { id: "sub-6", name: "LAN-Events", threadCount: 4 },
+      { id: "sub-7", name: "Coaching", threadCount: 12 }
+    ]
   },
   {
     id: "cat-2",
@@ -65,7 +75,13 @@ const categories: Category[] = [
     description: "Storytelling, Builds & Theorycrafting",
     icon: "swords",
     threadCount: 96,
-    postCount: 804
+    postCount: 804,
+    subcategories: [
+      { id: "sub-8", name: "Lore", threadCount: 28 },
+      { id: "sub-9", name: "Builds", threadCount: 36 },
+      { id: "sub-10", name: "Mods", threadCount: 17 },
+      { id: "sub-11", name: "Speedruns", threadCount: 11 }
+    ]
   },
   {
     id: "cat-3",
@@ -74,7 +90,13 @@ const categories: Category[] = [
     description: "Drafts, Meta-Analyse & Turniere",
     icon: "shield",
     threadCount: 75,
-    postCount: 612
+    postCount: 612,
+    subcategories: [
+      { id: "sub-12", name: "Patchnotes", threadCount: 22 },
+      { id: "sub-13", name: "Champion-Guides", threadCount: 18 },
+      { id: "sub-14", name: "Drafting", threadCount: 14 },
+      { id: "sub-15", name: "Esports", threadCount: 16 }
+    ]
   },
   {
     id: "cat-4",
@@ -83,9 +105,152 @@ const categories: Category[] = [
     description: "Hidden Gems & Game Dev Insights",
     icon: "sparkles",
     threadCount: 54,
-    postCount: 301
+    postCount: 301,
+    subcategories: [
+      { id: "sub-16", name: "Pixel Art", threadCount: 12 },
+      { id: "sub-17", name: "Solo Dev", threadCount: 9 },
+      { id: "sub-18", name: "Narrative", threadCount: 7 },
+      { id: "sub-19", name: "Soundtracks", threadCount: 6 }
+    ]
+  },
+  {
+    id: "cat-5",
+    slug: "sim",
+    name: "Sim Orbit",
+    description: "Space- & Vehicle-Sims, Cockpits & Telemetrie",
+    icon: "rocket",
+    threadCount: 82,
+    postCount: 540,
+    subcategories: [
+      { id: "sub-20", name: "Flight Sims", threadCount: 24 },
+      { id: "sub-21", name: "Racing", threadCount: 20 },
+      { id: "sub-22", name: "Hardware", threadCount: 16 },
+      { id: "sub-23", name: "VR", threadCount: 12 }
+    ]
+  },
+  {
+    id: "cat-6",
+    slug: "strategy",
+    name: "Strategium",
+    description: "4X, RTS & Taktik-Highlights im Deep-Dive",
+    icon: "brain",
+    threadCount: 91,
+    postCount: 688,
+    subcategories: [
+      { id: "sub-24", name: "Build Orders", threadCount: 21 },
+      { id: "sub-25", name: "Turniere", threadCount: 13 },
+      { id: "sub-26", name: "Wargames", threadCount: 9 },
+      { id: "sub-27", name: "Deckbau", threadCount: 10 }
+    ]
+  },
+  {
+    id: "cat-7",
+    slug: "creative",
+    name: "Creative Forge",
+    description: "Modding, Asset-Sharing & Tooling",
+    icon: "palette",
+    threadCount: 48,
+    postCount: 274,
+    subcategories: [
+      { id: "sub-28", name: "Blender", threadCount: 14 },
+      { id: "sub-29", name: "Unreal", threadCount: 11 },
+      { id: "sub-30", name: "Unity", threadCount: 9 },
+      { id: "sub-31", name: "Shaders", threadCount: 6 },
+      { id: "sub-32", name: "Concept Art", threadCount: 8 }
+    ]
+  },
+  {
+    id: "cat-8",
+    slug: "fighting",
+    name: "Fight Lab",
+    description: "Frame Data, Tech & Match-Ups",
+    icon: "gamepad-2",
+    threadCount: 58,
+    postCount: 402,
+    subcategories: [
+      { id: "sub-33", name: "Combo Guides", threadCount: 19 },
+      { id: "sub-34", name: "Netcode", threadCount: 8 },
+      { id: "sub-35", name: "Events", threadCount: 12 },
+      { id: "sub-36", name: "Tier Lists", threadCount: 11 }
+    ]
+  },
+  {
+    id: "cat-9",
+    slug: "mobile",
+    name: "Pocket Realm",
+    description: "Mobile Games, Touch-Optimierungen & Cloud Play",
+    icon: "smartphone",
+    threadCount: 67,
+    postCount: 358,
+    subcategories: [
+      { id: "sub-37", name: "Gacha", threadCount: 15 },
+      { id: "sub-38", name: "Controllers", threadCount: 10 },
+      { id: "sub-39", name: "Cloud", threadCount: 14 },
+      { id: "sub-40", name: "Indie", threadCount: 8 }
+    ]
+  },
+  {
+    id: "cat-10",
+    slug: "retro",
+    name: "Retro Vault",
+    description: "Speedruns, Preservation & CRT-Setups",
+    icon: "joystick",
+    threadCount: 43,
+    postCount: 245,
+    subcategories: [
+      { id: "sub-41", name: "Emulation", threadCount: 16 },
+      { id: "sub-42", name: "Hardware", threadCount: 12 },
+      { id: "sub-43", name: "Records", threadCount: 9 }
+    ]
+  },
+  {
+    id: "cat-11",
+    slug: "coop",
+    name: "Co-Op Collective",
+    description: "Partyfinder, Clan-Support & Crossplay",
+    icon: "users",
+    threadCount: 62,
+    postCount: 331,
+    subcategories: [
+      { id: "sub-44", name: "LFG", threadCount: 20 },
+      { id: "sub-45", name: "Crossplay", threadCount: 12 },
+      { id: "sub-46", name: "Clans", threadCount: 14 },
+      { id: "sub-47", name: "Events", threadCount: 10 }
+    ]
+  },
+  {
+    id: "cat-12",
+    slug: "wellbeing",
+    name: "Player Balance",
+    description: "Performance, Ergonomie & Mental Game",
+    icon: "heart-pulse",
+    threadCount: 37,
+    postCount: 214,
+    subcategories: [
+      { id: "sub-48", name: "Ergonomie", threadCount: 11 },
+      { id: "sub-49", name: "Mindset", threadCount: 9 },
+      { id: "sub-50", name: "Workout", threadCount: 8 },
+      { id: "sub-51", name: "Nutrition", threadCount: 6 }
+    ]
   }
 ];
+
+const categoryMeta: Record<string, { createdAt: number; hasNew: boolean; tag: string }> = {
+  "cat-1": { createdAt: Date.parse("2024-06-12"), hasNew: true, tag: "Shooter" },
+  "cat-2": { createdAt: Date.parse("2024-05-30"), hasNew: true, tag: "RPG" },
+  "cat-3": { createdAt: Date.parse("2024-04-18"), hasNew: false, tag: "MOBA" },
+  "cat-4": { createdAt: Date.parse("2024-03-11"), hasNew: true, tag: "Indie" },
+  "cat-5": { createdAt: Date.parse("2024-06-02"), hasNew: false, tag: "Simulation" },
+  "cat-6": { createdAt: Date.parse("2024-02-22"), hasNew: true, tag: "Strategy" },
+  "cat-7": { createdAt: Date.parse("2024-01-12"), hasNew: false, tag: "Creative" },
+  "cat-8": { createdAt: Date.parse("2024-05-05"), hasNew: true, tag: "Fighting" },
+  "cat-9": { createdAt: Date.parse("2024-04-01"), hasNew: true, tag: "Mobile" },
+  "cat-10": { createdAt: Date.parse("2023-12-18"), hasNew: false, tag: "Retro" },
+  "cat-11": { createdAt: Date.parse("2024-03-30"), hasNew: true, tag: "Co-Op" },
+  "cat-12": { createdAt: Date.parse("2024-02-10"), hasNew: false, tag: "Wellbeing" }
+};
+
+const categoryGenres = Array.from(new Set(Object.values(categoryMeta).map((meta) => meta.tag))).sort();
 
 const threadSeeds: ThreadWithMeta[] = Array.from({ length: 24 }).map((_, idx) => {
   const category = categories[idx % categories.length];
@@ -161,10 +326,62 @@ export const mockApi = {
     maybeFail();
     return { ...stats, usersOnline: stats.usersOnline + Math.round(Math.random() * 12 - 6) };
   },
-  async getCategories(): Promise<Category[]> {
+  async getCategories(filter: CategoryFilter = {}): Promise<PaginatedResponse<Category>> {
     await wait();
     maybeFail();
-    return categories;
+
+    const { q, sort = "name", onlyNew, tag, page = 1, pageSize = 12 } = filter;
+
+    const normalizedQuery = q?.trim().toLowerCase();
+
+    let filtered = categories.slice();
+
+    if (normalizedQuery) {
+      filtered = filtered.filter((category) => {
+        const matchesCategory =
+          category.name.toLowerCase().includes(normalizedQuery) ||
+          category.description?.toLowerCase().includes(normalizedQuery);
+        const matchesSub = category.subcategories?.some((sub) =>
+          sub.name.toLowerCase().includes(normalizedQuery)
+        );
+        return matchesCategory || matchesSub;
+      });
+    }
+
+    if (onlyNew) {
+      filtered = filtered.filter((category) => categoryMeta[category.id]?.hasNew);
+    }
+
+    if (tag) {
+      filtered = filtered.filter((category) => categoryMeta[category.id]?.tag === tag);
+    }
+
+    const sorted = filtered.sort((a, b) => {
+      switch (sort) {
+        case "threads":
+          return b.threadCount - a.threadCount;
+        case "posts":
+          return b.postCount - a.postCount;
+        case "new":
+          return (categoryMeta[b.id]?.createdAt ?? 0) - (categoryMeta[a.id]?.createdAt ?? 0);
+        case "name":
+        default:
+          return a.name.localeCompare(b.name, "de-DE");
+      }
+    });
+
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+
+    return {
+      data: sorted.slice(start, end),
+      page,
+      pageSize,
+      total: sorted.length
+    } satisfies PaginatedResponse<Category>;
+  },
+  getCategoryGenres(): string[] {
+    return categoryGenres;
   },
   async getThreads(filter: ThreadFilter = {}): Promise<PaginatedResponse<ThreadWithMeta>> {
     await wait();
