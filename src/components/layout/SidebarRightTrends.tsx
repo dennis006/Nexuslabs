@@ -32,10 +32,10 @@ const SidebarRightTrends = () => {
     void load();
   }, []);
 
+  const density = useUiStore((state) => state.density);
+
   if (loading && trending.length === 0) return <LoadingSkeleton />;
   if (error) return <ErrorState message={error} onRetry={load} />;
-
-  const density = useUiStore((state) => state.density);
 
   return (
     <aside className="space-y-4" data-density={density}>
