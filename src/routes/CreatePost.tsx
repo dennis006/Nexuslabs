@@ -1,29 +1,48 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
 import { useForumStore } from "@/store/forumStore";
 import Composer from "@/components/forum/Composer";
-import { ChevronDown } from "lucide-react";
 import type { Category } from "@/lib/api/types";
 import { toast } from "sonner";
+import { useUser } from "@/store/userStore";
 
 const CreatePost = () => {
+  const { categoryId } = useParams();
+  const navigate = useNavigate();
   const { categories, fetchCategories, createThread } = useForumStore();
-  const [category, setCategory] = useState<string>("");
+  const user = useUser((state) => state.user);
+  const isAdmin = user?.role === "admin";
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(categoryId ?? undefined);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!categories.length) void fetchCategories();
   }, [categories.length, fetchCategories]);
 
+  useEffect(() => {
+    if (!categoryId) {
+      navigate("/forum", { replace: true });
+    } else {
+      setSelectedCategory(categoryId);
+    }
+  }, [categoryId, navigate]);
+
+  const activeCategory = useMemo(
+    () => categories.find((cat: Category) => cat.id === (selectedCategory ?? categoryId)),
+    [categories, selectedCategory, categoryId]
+  );
+
   const handleSubmit = async ({ title, body }: { title?: string; body: string }) => {
-    if (!title || !category) {
+    const targetCategory = selectedCategory ?? categoryId;
+    if (!title || !targetCategory) {
       toast.error("Bitte Kategorie und Titel wählen");
       return;
     }
     try {
       setSubmitting(true);
       await createThread({
-        categoryId: category,
+        categoryId: targetCategory,
         title,
         tags: ["Community"],
         body,
@@ -46,25 +65,27 @@ const CreatePost = () => {
         </header>
         <div className="space-y-4 rounded-3xl border border-border/60 bg-card/70 p-6">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground" htmlFor="category">
-              Kategorie
-            </label>
-            <div className="relative">
-              <select
-                id="category"
-                value={category}
-                onChange={(event) => setCategory(event.target.value)}
-                className="w-full appearance-none rounded-md border border-border/60 bg-background/60 px-4 py-2 text-sm"
-              >
-                <option value="">Kategorie wählen</option>
-                {categories.map((cat: Category) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            </div>
+            <span className="text-sm font-medium text-muted-foreground">Kategorie</span>
+            {isAdmin ? (
+              <div className="relative">
+                <select
+                  value={selectedCategory ?? ""}
+                  onChange={(event) => setSelectedCategory(event.target.value || undefined)}
+                  className="w-full appearance-none rounded-md border border-border/60 bg-background/60 px-4 py-2 text-sm"
+                >
+                  <option value="">Kategorie wählen</option>
+                  {categories.map((cat: Category) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-border/60 bg-background/60 px-4 py-3 text-sm">
+                {activeCategory ? activeCategory.name : "Kategorie wird geladen…"}
+              </div>
+            )}
           </div>
           <Composer onSubmit={handleSubmit} variant="thread" isSubmitting={submitting} />
         </div>

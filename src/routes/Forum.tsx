@@ -7,9 +7,8 @@ import ThreadItem from "@/components/forum/ThreadItem";
 import LoadingSkeleton from "@/components/common/LoadingSkeleton";
 import ErrorState from "@/components/common/ErrorState";
 import EmptyState from "@/components/forum/EmptyState";
-import { Button } from "@/components/ui/button";
 import SearchBar from "@/components/common/SearchBar";
-import { MessageSquarePlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Loader2, ChevronDown, Check, SlidersHorizontal, Sparkles } from "lucide-react";
 import {
   DropdownMenu,
@@ -19,12 +18,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
-import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils/cn";
 import type { CategoryFilter } from "@/lib/api/types";
 import SidebarLeftStats from "@/components/layout/SidebarLeftStats";
 import SidebarRightTrends from "@/components/layout/SidebarRightTrends";
 import CategorySection from "@/components/forum/CategorySection";
+import ChatInline from "@/components/chat/ChatInline";
 
 const CATEGORY_SORT_OPTIONS: Array<{ value: NonNullable<CategoryFilter["sort"]>; label: string }> = [
   { value: "name", label: "Name A–Z" },
@@ -34,7 +33,6 @@ const CATEGORY_SORT_OPTIONS: Array<{ value: NonNullable<CategoryFilter["sort"]>;
 ];
 
 const Forum = () => {
-  const navigate = useNavigate();
   const activeTab = useUiStore((state) => state.activeTab);
   const {
     categories,
@@ -159,13 +157,11 @@ const Forum = () => {
                         Was passiert gerade in der NexusLabs Community?
                       </p>
                     </div>
-                    <Button size="lg" onClick={() => navigate("/create")} className="self-start md:self-auto">
-                      <MessageSquarePlus className="mr-2 h-4 w-4" />
-                      Neuer Thread
-                    </Button>
                   </div>
                 </div>
               </div>
+
+              <ChatInline className="mx-auto w-full max-w-[1120px] 2xl:max-w-[1240px]" />
 
               <section
                 className="space-y-6 md:space-y-8 data-[density=compact]:space-y-4 md:data-[density=compact]:space-y-5"

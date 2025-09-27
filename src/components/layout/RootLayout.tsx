@@ -3,7 +3,6 @@ import Header from "./Header";
 import Footer from "./Footer";
 import SidebarLeftStats from "./SidebarLeftStats";
 import SidebarRightTrends from "./SidebarRightTrends";
-import ChatDock from "@/components/chat/ChatDock";
 import { useUiStore } from "@/store/uiStore";
 import {
   Sheet,
@@ -27,10 +26,6 @@ const RootLayout = ({ children }: PropsWithChildren) => {
         {children}
       </main>
       <Footer />
-      <div className="fixed bottom-6 right-6 z-40">
-        <ChatDock className="w-[360px] 2xl:w-[380px]" />
-      </div>
-
       <Sheet open={sidebarLeftOpen} onOpenChange={(open) => toggleLeft(open)}>
         <SheetContent className="left-0 right-auto w-full max-w-sm border-r">
           <SheetHeader>
