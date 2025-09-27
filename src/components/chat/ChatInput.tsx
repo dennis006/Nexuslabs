@@ -4,16 +4,28 @@ import { Button } from "@/components/ui/button";
 import { useChatStore } from "@/store/chatStore";
 import { useUiStore } from "@/store/uiStore";
 import { cn } from "@/lib/utils/cn";
+import { newId } from "@/lib/utils/id";
+import type { ChatMessage } from "@/lib/api/types";
 
 const ChatInput = () => {
   const [value, setValue] = useState("");
-  const send = useChatStore((state) => state.sendMessage);
+  const addMessage = useChatStore((state) => state.addMessage);
   const density = useUiStore((state) => state.density);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!value.trim()) return;
-    send(value.trim());
+    const message: ChatMessage = {
+      id: newId("user"),
+      text: value.trim(),
+      createdAt: new Date().toISOString(),
+      author: {
+        id: "user-self",
+        name: "Du",
+        avatarUrl: "https://i.pravatar.cc/150?img=5",
+      },
+    };
+    addMessage(message);
     setValue("");
   };
 

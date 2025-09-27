@@ -1,54 +1,41 @@
 import { create } from "zustand";
 import type { ChatMessage } from "@/lib/api/types";
-import { mockApi } from "@/lib/api/mockApi";
-import { socketMock } from "@/lib/realtime/socketMock";
-import { nanoid } from "nanoid";
+import { dedupeById } from "@/lib/utils/dedupe";
 
-interface ChatState {
-  messages: ChatMessage[];
+type State = {
+  messagesMap: Map<string, ChatMessage>;
+  ordered: () => ChatMessage[];
   connected: boolean;
-  typing: boolean;
-  init: () => Promise<void>;
-  sendMessage: (text: string) => void;
-  receiveMessage: (message: ChatMessage) => void;
-}
+};
+type Actions = {
+  connect: () => void;
+  disconnect: () => void;
+  addMessage: (msg: ChatMessage) => void;
+  addMessages: (msgs: ChatMessage[]) => void;
+  clear: () => void;
+};
 
-export const useChatStore = create<ChatState>((set, get) => ({
-  messages: [],
+export const useChatStore = create<State & Actions>((set, get) => ({
+  messagesMap: new Map(),
   connected: false,
-  typing: false,
-  async init() {
-    if (get().connected) return;
-    const seed = await mockApi.getSystemMessages();
-    set({ messages: seed, connected: true });
-    socketMock.on("chat:message", (payload) => {
-      get().receiveMessage(payload);
-    });
-    socketMock.connect();
+  ordered: () => {
+    const values = Array.from(get().messagesMap.values());
+    values.sort((a, b) => +new Date(a.createdAt) - +new Date(b.createdAt));
+    return values;
   },
-  sendMessage(text) {
-    const message: ChatMessage = {
-      id: nanoid(),
-      text,
-      createdAt: new Date().toISOString(),
-      author: {
-        id: "user-self",
-        name: "Du",
-        avatarUrl: "https://i.pravatar.cc/150?img=5"
-      }
-    };
-    set(({ messages }) => ({ messages: [...messages, message] }));
-    // Echo to mock socket for demo layering
-    setTimeout(() => {
-      socketMock.emit("chat:message", {
-        id: nanoid(),
-        text: "Echo: Danke fürs Teilen!",
-        createdAt: new Date().toISOString(),
-        system: false
-      });
-    }, 1200);
-  },
-  receiveMessage(message) {
-    set(({ messages }) => ({ messages: [...messages, message] }));
-  }
+  connect: () => set({ connected: true }),
+  disconnect: () => set({ connected: false }),
+  addMessage: (msg) =>
+    set((s) => {
+      const map = new Map(s.messagesMap);
+      map.set(msg.id, msg);
+      return { messagesMap: map };
+    }),
+  addMessages: (msgs) =>
+    set((s) => {
+      const map = new Map(s.messagesMap);
+      for (const m of dedupeById(msgs)) map.set(m.id, m);
+      return { messagesMap: map };
+    }),
+  clear: () => set({ messagesMap: new Map() }),
 }));

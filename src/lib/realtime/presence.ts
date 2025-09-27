@@ -1,17 +1,20 @@
 import { useEffect } from "react";
-import { socketMock } from "./socketMock";
+import { on, startMock, stopMock } from "./socketMock";
 import { usePresenceStore } from "@/store/presenceStore";
 
 export const usePresenceSubscription = () => {
   const setOnline = usePresenceStore((state) => state.setOnlineCount);
 
   useEffect(() => {
-    const handler = (count: number) => setOnline(count);
-    socketMock.on("presence:update", handler);
-    socketMock.connect();
+    startMock();
+    const off = on("presence:update", (payload) => {
+      if (typeof payload?.online === "number") {
+        setOnline(payload.online);
+      }
+    });
     return () => {
-      socketMock.off("presence:update", handler);
-      socketMock.disconnect();
+      off();
+      stopMock();
     };
   }, [setOnline]);
 };
