@@ -105,8 +105,8 @@ const authRoutes: FastifyPluginAsync = async (app) => {
       select: { id: true, email: true, username: true, role: true, createdAt: true },
     });
 
-    const access = app.accessJwt.sign({ sub: user.id, role: user.role });
-    const refresh = app.refreshJwt.sign({ sub: user.id });
+    const access = app.jwt.sign({ sub: user.id, role: user.role }, { expiresIn: "10m" });
+    const refresh = app.jwt.sign({ sub: user.id }, { expiresIn: "7d" });
     setRefresh(reply, refresh);
 
     return reply.send({ user, accessToken: access });
@@ -180,8 +180,8 @@ const authRoutes: FastifyPluginAsync = async (app) => {
         .send({ error: "INVALID_CREDENTIALS", message: "Ungültige Zugangsdaten" });
     }
 
-    const access = app.accessJwt.sign({ sub: user.id, role: user.role });
-    const refresh = app.refreshJwt.sign({ sub: user.id });
+    const access = app.jwt.sign({ sub: user.id, role: user.role }, { expiresIn: "10m" });
+    const refresh = app.jwt.sign({ sub: user.id }, { expiresIn: "7d" });
     setRefresh(reply, refresh);
 
     const { passwordHash, ...safeUser } = user;
@@ -195,7 +195,7 @@ const authRoutes: FastifyPluginAsync = async (app) => {
     }
 
     try {
-      const payload = app.refreshJwt.verify(token) as { sub: string };
+      const payload = app.jwt.verify(token) as { sub: string };
       const user = await app.db.user.findUnique({
         where: { id: payload.sub },
         select: { id: true, email: true, username: true, role: true, createdAt: true },
@@ -205,7 +205,7 @@ const authRoutes: FastifyPluginAsync = async (app) => {
         return reply.code(401).send({ error: "NO_USER" });
       }
 
-      const access = app.accessJwt.sign({ sub: user.id, role: user.role });
+      const access = app.jwt.sign({ sub: user.id, role: user.role }, { expiresIn: "10m" });
       return reply.send({ accessToken: access, user });
     } catch (error) {
       if (dbg) {
@@ -229,7 +229,7 @@ const authRoutes: FastifyPluginAsync = async (app) => {
     }
 
     try {
-      const payload = app.accessJwt.verify(token) as { sub: string };
+      const payload = app.jwt.verify(token) as { sub: string };
       const user = await app.db.user.findUnique({
         where: { id: payload.sub },
         select: { id: true, email: true, username: true, role: true, createdAt: true },
