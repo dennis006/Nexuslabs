@@ -1,7 +1,8 @@
 import type { FastifyPluginAsync, FastifyReply } from "fastify";
 import { z } from "zod";
 import argon2 from "argon2";
-import bcrypt from "bcryptjs";
+
+type BcryptModule = typeof import("bcryptjs");
 
 const RegisterSchema = z.object({
   email: z.string().email(),
@@ -23,11 +24,52 @@ const authRoutes: FastifyPluginAsync = async (app) => {
   const ARGON_PREFIX = "$argon2";
   const BCRYPT_ROUNDS = 12;
 
-  const hashPassword = (password: string) => bcrypt.hash(password, BCRYPT_ROUNDS);
+  let cachedBcrypt: BcryptModule | null = null;
+  let attemptedBcryptLoad = false;
+
+  const loadBcrypt = async (): Promise<BcryptModule | null> => {
+    if (cachedBcrypt) {
+      return cachedBcrypt;
+    }
+
+    if (attemptedBcryptLoad) {
+      return null;
+    }
+
+    attemptedBcryptLoad = true;
+
+    try {
+      const mod = await import("bcryptjs");
+      const resolved = (mod as BcryptModule & { default?: BcryptModule }).default ?? (mod as BcryptModule);
+      cachedBcrypt = resolved;
+      return cachedBcrypt;
+    } catch (error) {
+      app.log.warn({ err: error }, "bcryptjs module not available; falling back to argon2 only");
+      return null;
+    }
+  };
+
+  const hashPassword = async (password: string): Promise<string> => {
+    const bcrypt = await loadBcrypt();
+    if (bcrypt) {
+      return bcrypt.hash(password, BCRYPT_ROUNDS);
+    }
+
+    return argon2.hash(password, { type: argon2.argon2id });
+  };
 
   const verifyPassword = async (hash: string, password: string) => {
     try {
       if (BCRYPT_PREFIXES.some((prefix) => hash.startsWith(prefix))) {
+        const bcrypt = await loadBcrypt();
+        if (!bcrypt) {
+          app.log.error(
+            { hashPreview: hash.slice(0, 10) },
+            "Cannot verify bcrypt hash because bcryptjs module is not installed"
+          );
+          return false;
+        }
+
         return await bcrypt.compare(password, hash);
       }
 
