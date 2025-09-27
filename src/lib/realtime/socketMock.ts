@@ -1,3 +1,5 @@
+import { nanoid } from "nanoid";
+
 type Listener<T> = (payload: T) => void;
 
 type EventMap = {
@@ -66,7 +68,7 @@ class SocketMock {
     this.chatInterval = setInterval(() => {
       const message = sampleMessages[Math.floor(Math.random() * sampleMessages.length)];
       this.emit("chat:message", {
-        id: crypto.randomUUID(),
+        id: nanoid(),
         text: message,
         system: Math.random() > 0.75,
         createdAt: new Date().toISOString()

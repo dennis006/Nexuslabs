@@ -2,6 +2,7 @@ import { create } from "zustand";
 import type { ChatMessage } from "@/lib/api/types";
 import { mockApi } from "@/lib/api/mockApi";
 import { socketMock } from "@/lib/realtime/socketMock";
+import { nanoid } from "nanoid";
 
 interface ChatState {
   messages: ChatMessage[];
@@ -27,7 +28,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   },
   sendMessage(text) {
     const message: ChatMessage = {
-      id: crypto.randomUUID(),
+      id: nanoid(),
       text,
       createdAt: new Date().toISOString(),
       author: {
@@ -40,7 +41,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     // Echo to mock socket for demo layering
     setTimeout(() => {
       socketMock.emit("chat:message", {
-        id: crypto.randomUUID(),
+        id: nanoid(),
         text: "Echo: Danke fürs Teilen!",
         createdAt: new Date().toISOString(),
         system: false
