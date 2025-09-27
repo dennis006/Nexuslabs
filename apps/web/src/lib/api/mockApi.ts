@@ -16,19 +16,34 @@ import type {
 } from "./types";
 import { sortThreads } from "./filters";
 
+const FAIL_RATE =
+  typeof import.meta !== "undefined" && import.meta.env?.VITE_MOCK_FAIL_RATE
+    ? Math.max(0, Math.min(1, Number(import.meta.env.VITE_MOCK_FAIL_RATE)))
+    : 0;
+
 const LATENCY = { min: 240, max: 640 };
-const FAILURE_RATE = 0.05;
 
 const wait = () =>
   new Promise<void>((resolve) =>
     setTimeout(resolve, Math.random() * (LATENCY.max - LATENCY.min) + LATENCY.min)
   );
 
-const maybeFail = () => {
-  if (Math.random() < FAILURE_RATE) {
-    throw new Error("Mock API Fehler – bitte erneut versuchen");
+function delay(ms: number) {
+  return new Promise((res) => setTimeout(res, ms));
+}
+
+async function maybeFail(label: string) {
+  if (FAIL_RATE <= 0) return;
+  await delay(120);
+  if (Math.random() < FAIL_RATE) {
+    const err = new Error(`Mock API Fehler – bitte erneut versuchen (${label})`);
+    if (import.meta.env.DEV) {
+      console.warn(err.message);
+      return;
+    }
+    throw err;
   }
-};
+}
 
 const nowIso = () => new Date().toISOString();
 
@@ -278,8 +293,8 @@ const cloneForumBoard = (): ForumSection[] =>
   }));
 
 const fetchForumBoard = async (): Promise<ForumSection[]> => {
+  await maybeFail("fetchForumBoard");
   await wait();
-  maybeFail();
   return cloneForumBoard();
 };
 
@@ -556,13 +571,25 @@ const systemMessages: ChatMessage[] = [
 
 export const mockApi = {
   async getStats(): Promise<Stats> {
-    await wait();
-    maybeFail();
-    return { ...stats, usersOnline: stats.usersOnline + Math.round(Math.random() * 12 - 6) };
+    try {
+      await maybeFail("getStats");
+      await wait();
+      return { ...stats, usersOnline: stats.usersOnline + Math.round(Math.random() * 12 - 6) };
+    } catch (e) {
+      console.warn("getStats fallback", e);
+      return {
+        usersTotal: 0,
+        usersOnline: 0,
+        categoriesTotal: 0,
+        threadsTotal: 0,
+        postsTotal: 0,
+        messagesTotal: 0
+      } satisfies Stats;
+    }
   },
   async getCategories(filter: CategoryFilter = {}): Promise<PaginatedResponse<Category>> {
+    await maybeFail("getCategories");
     await wait();
-    maybeFail();
 
     const { q, sort = "name", onlyNew, tag, page = 1, pageSize = 12 } = filter;
 
@@ -618,8 +645,8 @@ export const mockApi = {
     return categoryGenres;
   },
   async getThreads(filter: ThreadFilter = {}): Promise<PaginatedResponse<ThreadWithMeta>> {
+    await maybeFail("getThreads");
     await wait();
-    maybeFail();
     const { categoryId, sort = "new", page = 1, pageSize = 8 } = filter;
     const filtered = sortThreads(
       categoryId ? threadSeeds.filter((thread) => thread.categoryId === categoryId) : threadSeeds,
@@ -635,13 +662,13 @@ export const mockApi = {
     };
   },
   async getThreadById(id: string): Promise<ThreadWithMeta | undefined> {
+    await maybeFail("getThreadById");
     await wait();
-    maybeFail();
     return threadSeeds.find((thread) => thread.id === id);
   },
   async getPosts(threadId: string, page = 1, pageSize = 5): Promise<PagedResponse<Post>> {
+    await maybeFail("getPosts");
     await wait();
-    maybeFail();
     const threadPosts = posts
       .filter((post) => post.threadId === threadId)
       .sort(
@@ -665,8 +692,8 @@ export const mockApi = {
     return fetchForumBoard();
   },
   async createThread(data: Pick<ThreadWithMeta, "categoryId" | "title" | "tags"> & { body: string; authorId: string }): Promise<ThreadWithMeta> {
+    await maybeFail("createThread");
     await wait();
-    maybeFail();
     const thread: ThreadWithMeta = {
       id: nanoid(),
       categoryId: data.categoryId,
@@ -693,8 +720,8 @@ export const mockApi = {
     return thread;
   },
   async createPost(threadId: string, data: { authorId: string; content: string }): Promise<Post> {
+    await maybeFail("createPost");
     await wait();
-    maybeFail();
     const post: Post = {
       id: nanoid(),
       threadId,
@@ -714,14 +741,17 @@ export const mockApi = {
     return post;
   },
   async getSystemMessages(): Promise<ChatMessage[]> {
+    await maybeFail("getSystemMessages");
     await wait();
     return systemMessages;
   },
   async getUserById(id: string): Promise<User | undefined> {
+    await maybeFail("getUserById");
     await wait();
     return users.find((user) => user.id === id);
   },
   async getUsers(): Promise<User[]> {
+    await maybeFail("getUsers");
     await wait();
     return users;
   }
