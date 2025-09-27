@@ -8,7 +8,7 @@ const RegisterSchema = z.object({
     .string()
     .min(3)
     .max(20)
-    .regex(/^[a-zA-Z0-9_-]+$/, "Nur Buchstaben, Zahlen, Unterstrich und Bindestrich erlaubt"),
+    .regex(/^[a-zA-Z0-9_\-]+$/, "Nur Buchstaben, Zahlen, Unterstrich und Bindestrich erlaubt"),
   password: z.string().min(8).max(72)
 });
 
