@@ -9,24 +9,6 @@ import authRoutes from "./routes/auth";
 import usersRoutes from "./routes/users";
 import { errorHandler } from "./errors";
 
-type JwtInstance = {
-  sign: (payload: Record<string, unknown>, options?: Record<string, unknown>) => string;
-  verify: <T = unknown>(token: string, options?: Record<string, unknown>) => T;
-};
-
-declare module "fastify" {
-  interface FastifyInstance {
-    accessJwt: JwtInstance;
-    refreshJwt: JwtInstance;
-  }
-}
-
-declare module "@fastify/jwt" {
-  interface FastifyJWT {
-    payload: Record<string, unknown>;
-  }
-}
-
 const main = async () => {
   const app = Fastify({ logger: true });
 
@@ -44,13 +26,13 @@ const main = async () => {
   await app.register(jwt, {
     secret: env.accessSecret,
     sign: { expiresIn: "10m" },
-    namespace: "access"
+    decoratorName: "accessJwt",
   });
 
   await app.register(jwt, {
     secret: env.refreshSecret,
     sign: { expiresIn: "7d" },
-    namespace: "refresh"
+    decoratorName: "refreshJwt",
   });
 
   await app.register(dbPlugin);
