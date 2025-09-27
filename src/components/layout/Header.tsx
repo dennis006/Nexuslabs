@@ -24,7 +24,7 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-      <div className="mx-auto flex w-full max-w-screen-2xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center gap-4 px-4 sm:px-6 lg:h-[72px] lg:px-8 2xl:max-w-[1720px] 2xl:px-10 3xl:max-w-[1880px]">
         <button
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-border/60 bg-background/60 text-muted-foreground lg:hidden"
           onClick={() => toggleLeft(true)}

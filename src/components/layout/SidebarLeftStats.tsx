@@ -41,13 +41,14 @@ const SidebarLeftStats = () => {
   if (!stats) return null;
 
   return (
-    <aside className="space-y-4" data-density={density}>
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        Statistik
-      </h2>
+    <div className="space-y-5 data-[density=compact]:space-y-3 2xl:space-y-6" data-density={density}>
+      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Statistik</h2>
       <div
         data-density={density}
-        className={cn("grid grid-cols-2 gap-4 md:gap-5", density === "compact" && "gap-3")}
+        className={cn(
+          "grid grid-cols-2 gap-4 md:gap-5",
+          "data-[density=compact]:gap-3 md:data-[density=compact]:gap-4"
+        )}
       >
         <StatTile label="Registrierte Nutzer" value={stats.usersTotal} icon={Users} />
         <StatTile label="Gerade online" value={online} icon={Flame} accent="from-amber-400/40 to-red-500/40" />
@@ -55,7 +56,7 @@ const SidebarLeftStats = () => {
         <StatTile label="Threads" value={stats.threadsTotal} icon={TrendingUp} accent="from-secondary/40 to-secondary/10" />
         <StatTile label="Beiträge" value={stats.postsTotal} icon={MessageSquare} accent="from-emerald-400/40 to-primary/10" />
       </div>
-    </aside>
+    </div>
   );
 };
 

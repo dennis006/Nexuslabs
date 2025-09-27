@@ -8,8 +8,13 @@ import { useChatStore } from "@/store/chatStore";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { on, startMock, stopMock } from "@/lib/realtime/socketMock";
 import { mockApi } from "@/lib/api/mockApi";
+import { cn } from "@/lib/utils/cn";
 
-const ChatDock = () => {
+type ChatDockProps = {
+  className?: string;
+};
+
+const ChatDock = ({ className }: ChatDockProps) => {
   const [open, setOpen] = useState(true);
   const messages = useChatStore((state) => state.ordered());
   const addMessage = useChatStore((state) => state.addMessage);
@@ -43,7 +48,7 @@ const ChatDock = () => {
   }, [messages]);
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 flex w-full max-w-sm flex-col gap-2 sm:right-6">
+    <div className={cn("flex w-full max-w-[min(100vw-3rem,380px)] flex-col gap-2", className)}>
       <AnimatePresence initial={false}>
         {open && (
           <motion.div
@@ -52,11 +57,11 @@ const ChatDock = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.25 }}
-            className="glass-panel flex h-[420px] flex-col rounded-2xl border border-border/60 bg-background/90 shadow-xl backdrop-blur"
+            className="glass-panel flex h-[420px] flex-col rounded-3xl border border-border/60 bg-background/90 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.45)] backdrop-blur supports-[backdrop-filter]:bg-background/80"
           >
             <ChatHeader onMinimize={() => setOpen(false)} />
             <ScrollArea className="flex-1">
-              <div className="space-y-3 px-4 py-3">
+              <div className="space-y-3 p-3 md:p-4">
                 <AnimatePresence initial={false}>
                   {messages.map((message) => (
                     <motion.div

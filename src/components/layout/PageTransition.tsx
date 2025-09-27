@@ -3,7 +3,7 @@ import type { PropsWithChildren } from "react";
 import { pageTransition } from "@/lib/animations/framer";
 
 const PageTransition = ({ children }: PropsWithChildren) => (
-  <motion.main
+  <motion.section
     variants={pageTransition}
     initial="initial"
     animate="animate"
@@ -11,7 +11,7 @@ const PageTransition = ({ children }: PropsWithChildren) => (
     className="min-h-[calc(100vh-6rem)]"
   >
     {children}
-  </motion.main>
+  </motion.section>
 );
 
 export default PageTransition;
