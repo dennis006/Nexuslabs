@@ -12,7 +12,7 @@ import { formatRelativeTime } from "@/lib/utils/time";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Bell, Flag } from "lucide-react";
-import { Pagination } from "@/components/common/Pagination";
+import { ThreadPagination } from "@/components/common/ThreadPagination";
 import { useThreadStore } from "@/store/threadStore";
 
 const Thread = () => {
@@ -113,11 +113,11 @@ const Thread = () => {
       }
       return;
     }
-    const clamped = Math.min(Math.max(requestedPage, 1), totalPages || 1);
-    if (clamped !== requestedPage) {
-      setSearchParams({ page: String(clamped) }, { replace: true });
+    const safePage = Math.min(Math.max(requestedPage, 1), totalPages || 1);
+    if (safePage !== requestedPage || safePage !== page) {
+      setSearchParams({ page: String(safePage) }, { replace: true });
     }
-  }, [threadId, requestedPage, totalPages, totalCount, hasFetchedPosts, setSearchParams]);
+  }, [threadId, requestedPage, totalPages, totalCount, hasFetchedPosts, setSearchParams, page]);
 
   useEffect(() => {
     if (!lastCreatedPostId) return;
@@ -179,6 +179,8 @@ const Thread = () => {
   if (threadError) return <ErrorState message={threadError} onRetry={loadThread} />;
   if (!thread) return null;
 
+  const showTopPagination = (totalPages ?? 0) >= 6;
+
   return (
     <PageTransition>
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
@@ -211,6 +213,13 @@ const Thread = () => {
           </header>
 
           <div className="space-y-6">
+            <ThreadPagination
+              page={page}
+              totalPages={totalPages || 0}
+              onPageChange={handlePageChange}
+              placement="top"
+              show={showTopPagination}
+            />
             <div className="space-y-4">
               {postsLoading && !postsError ? (
                 Array.from({ length: 5 }).map((_, index) => (
@@ -251,13 +260,13 @@ const Thread = () => {
               )}
             </div>
 
-            <Pagination page={page} totalPages={totalPages || 0} onPageChange={handlePageChange} />
-
             <div className="space-y-4">
-              <Pagination
+              <ThreadPagination
                 page={page}
                 totalPages={totalPages || 0}
                 onPageChange={handlePageChange}
+                placement="bottom"
+                show={totalPages > 1}
               />
               <Composer onSubmit={handleSubmit} isSubmitting={submitting} />
             </div>
