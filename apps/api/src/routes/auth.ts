@@ -1,6 +1,7 @@
 import type { FastifyPluginAsync } from "fastify";
 import { z } from "zod";
 import argon2 from "argon2";
+import bcrypt from "bcryptjs";
 
 const Register = z.object({
   email: z.string().email(),
@@ -109,7 +110,22 @@ const authRoutes: FastifyPluginAsync = async (app) => {
         .send({ error: "INTERNAL_ERROR", message: "Account fehlerhaft konfiguriert" });
     }
 
-    const ok = await argon2.verify(user.passwordHash, password);
+    let ok = false;
+    try {
+      if (user.passwordHash.startsWith("$argon2")) {
+        ok = await argon2.verify(user.passwordHash, password);
+      } else if (/^\$2[aby]\$/.test(user.passwordHash)) {
+        ok = await bcrypt.compare(password, user.passwordHash);
+      } else {
+        throw new Error("unsupported_hash_algorithm");
+      }
+    } catch (error) {
+      req.log.error({ userId: user.id, error }, "login password verify failed");
+      return reply
+        .code(500)
+        .send({ error: "INTERNAL_ERROR", message: "Account fehlerhaft konfiguriert" });
+    }
+
     if (!ok) {
       if (dbg) {
         req.log.warn({ userId: user.id }, "login wrong password");
