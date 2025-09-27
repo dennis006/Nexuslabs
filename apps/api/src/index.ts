@@ -31,7 +31,9 @@ const main = async () => {
 
   await app.register(cors, {
     origin: env.origin,
-    credentials: true
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   });
 
   await app.register(cookie, {

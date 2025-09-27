@@ -79,6 +79,9 @@ export async function refresh() {
     method: "POST",
     credentials: "include"
   });
+  if (response.status === 401) {
+    return null;
+  }
   return parseJson<RefreshResponse>(response, "refresh_failed");
 }
 
@@ -109,6 +112,10 @@ export async function fetchWithAuth(input: RequestInfo | URL, init: RequestInit 
   if (response.status === 401) {
     try {
       const data = await refresh();
+      if (!data?.accessToken) {
+        clear();
+        throw new Error("refresh_failed");
+      }
       setAccessToken(data.accessToken);
       response = await execute(data.accessToken);
     } catch (error) {
