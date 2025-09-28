@@ -106,8 +106,10 @@ const Landing = () => {
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs uppercase tracking-wide text-primary">
               NexusLabs – The Next-Gen Gaming Forum
             </span>
-            <h1 className="text-4xl font-semibold tracking-tight text-foreground md:text-5xl">
-              <HandwritingText text="Verbinde dich mit der Elite der Gaming-Community" />
+            <h1 className="mb-6 text-balance">
+              <HandwritingText className="block">
+                Verbinde dich mit der Elite der Gaming-Community
+              </HandwritingText>
             </h1>
             <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
               Diskutiere Meta-Strategien, organisiere Scrims und erhalte Insights direkt aus der Szene. Mit Live-Presence, animierten Statistiken und einem Dock-Chat bleibst du immer verbunden.
