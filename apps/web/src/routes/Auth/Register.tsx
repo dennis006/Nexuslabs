@@ -1,9 +1,9 @@
 import type { FormEvent } from "react";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, UserPlus, Eye, EyeOff, Mail, User } from "lucide-react";
+import { Check, Loader2, Mail, User, UserPlus, X } from "lucide-react";
 import PageTransition from "@/components/layout/PageTransition";
 import RegisterBackground from "@/components/auth/RegisterBackground";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { register } from "@/lib/api/authApi";
 import { useUserStore } from "@/store/userStore";
 import { USERNAME_PATTERN, USERNAME_TITLE } from "@/features/auth/validation";
+import { useAvailability, type AvailabilityStatus } from "@/features/auth/useAvailability";
 
 // Kawaii Icons for Password Strength
 const KawaiiIcons = {
@@ -152,11 +153,34 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const normalizedEmail = form.email.trim().toLowerCase();
+  const normalizedUsername = form.username.trim();
+  const {
+    status,
+    invalid: availabilityInvalid,
+    loading: availabilityLoading,
+  } = useAvailability(normalizedEmail, normalizedUsername);
+
+  const canSubmit =
+    normalizedEmail.length > 0 &&
+    normalizedUsername.length >= 3 &&
+    form.password.length >= 8 &&
+    !availabilityInvalid &&
+    !availabilityLoading;
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (loading || !canSubmit) {
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await register(form);
+      const response = await register({
+        email: normalizedEmail,
+        username: normalizedUsername,
+        password: form.password,
+      });
       setSession(response.user, response.accessToken);
       toast.success(`Account erstellt! Willkommen, ${response.user.username}.`);
       const redirect = redirectParam || "/forum";
@@ -238,13 +262,21 @@ const Register = () => {
                     onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
                     required
                     disabled={loading}
-                    className="pl-10 transition-all duration-300 focus:shadow-[0_0_20px_rgba(56,189,248,0.3)] dark:focus:shadow-[0_0_20px_rgba(56,189,248,0.3)]"
+                    aria-invalid={status.email === "taken"}
+                    className="pl-10 pr-9 transition-all duration-300 focus:shadow-[0_0_20px_rgba(56,189,248,0.3)] dark:focus:shadow-[0_0_20px_rgba(56,189,248,0.3)]"
                   />
+                  <StatusIcon state={status.email} />
                 </div>
               </motion.div>
+              {status.email === "available" && (
+                <p className="mt-2 text-sm text-emerald-400">Diese E-Mail ist verfügbar.</p>
+              )}
+              {status.email === "taken" && (
+                <p className="mt-2 text-sm text-red-400">Diese E-Mail ist bereits vergeben.</p>
+              )}
             </motion.div>
 
-            <motion.div 
+            <motion.div
               className="space-y-2"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -271,10 +303,18 @@ const Register = () => {
                     title={USERNAME_TITLE}
                     required
                     disabled={loading}
-                    className="pl-10 transition-all duration-300 focus:shadow-[0_0_20px_rgba(56,189,248,0.3)] dark:focus:shadow-[0_0_20px_rgba(56,189,248,0.3)]"
+                    aria-invalid={status.username === "taken"}
+                    className="pl-10 pr-9 transition-all duration-300 focus:shadow-[0_0_20px_rgba(56,189,248,0.3)] dark:focus:shadow-[0_0_20px_rgba(56,189,248,0.3)]"
                   />
+                  <StatusIcon state={status.username} />
                 </div>
               </motion.div>
+              {status.username === "available" && (
+                <p className="mt-2 text-sm text-emerald-400">Dieser Benutzername ist verfügbar.</p>
+              )}
+              {status.username === "taken" && (
+                <p className="mt-2 text-sm text-red-400">Dieser Benutzername ist bereits vergeben.</p>
+              )}
             </motion.div>
 
             <motion.div 
@@ -368,10 +408,10 @@ const Register = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Button 
-                  type="submit" 
-                  className="w-full relative overflow-hidden" 
-                  disabled={loading}
+                <Button
+                  type="submit"
+                  className="w-full relative overflow-hidden"
+                  disabled={loading || !canSubmit}
                 >
                 <AnimatePresence mode="wait">
                   {loading ? (
@@ -433,6 +473,20 @@ const Register = () => {
         </motion.div>
       </div>
     </PageTransition>
+  );
+};
+
+const StatusIcon = ({ state }: { state: AvailabilityStatus }) => {
+  if (state === "idle") {
+    return null;
+  }
+
+  return (
+    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+      {state === "loading" && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+      {state === "available" && <Check className="h-4 w-4 text-emerald-400" />}
+      {state === "taken" && <X className="h-4 w-4 text-red-400" />}
+    </span>
   );
 };
 
