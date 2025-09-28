@@ -116,11 +116,11 @@ const Landing = () => {
             <div className="flex flex-wrap items-center justify-center gap-4">
               <Button size="lg" onClick={() => navigate("/forum")}
                 className="group">
-                <span>Enter Forum</span>
+                <span>Forum betreten</span>
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate("/register")}>
-                Create Account
+                Konto erstellen
               </Button>
             </div>
             {stats ? (
