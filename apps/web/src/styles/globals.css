@@ -103,3 +103,53 @@ h3 {
 .card-gradient {
   background: linear-gradient(135deg, rgba(0, 224, 255, 0.05), rgba(124, 58, 237, 0.07));
 }
+
+.handwriting {
+  position: relative;
+  isolation: isolate;
+}
+
+.handwriting__text {
+  position: relative;
+  display: inline-block;
+  padding-right: 0.5rem;
+  color: transparent;
+  background-image: linear-gradient(
+    90deg,
+    hsla(var(--foreground), 1) 0%,
+    hsla(var(--foreground), 1) 78%,
+    hsla(var(--foreground), 0.75) 92%,
+    transparent 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 0% 100%;
+  background-position: left center;
+  -webkit-background-clip: text;
+  background-clip: text;
+  letter-spacing: inherit;
+  white-space: pre-wrap;
+  will-change: background-size, filter;
+  transition: filter 0.4s ease-out;
+}
+
+.handwriting__pen {
+  position: absolute;
+  top: 58%;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 30% 30%, hsla(var(--foreground), 1) 0%, hsla(var(--foreground), 0.6) 65%, transparent 100%);
+  box-shadow: 0 0 18px rgba(0, 224, 255, 0.5);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.handwriting__pen::after {
+  content: "";
+  position: absolute;
+  inset: 55% -30% -35% 45%;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.4), rgba(0, 224, 255, 0.3));
+  filter: blur(3px);
+  opacity: 0.75;
+}
