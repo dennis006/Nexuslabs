@@ -24,6 +24,21 @@ nexuslabs/
 - 🌗 Dark Mode standardmäßig aktiv, Light Mode Toggle mit Persistenz.
 - 🧹 ESLint + Prettier Konfiguration für sauberen TypeScript-Code.
 
+## Badge-Orchestrierung
+
+- Alle offiziellen NexusLabs-Badges werden automatisch über deklarative Regeln in `apps/api/src/badges/rules.ts` vergeben.
+- Die Evaluierung lädt alle benötigten Benutzer-, Statistik- und Legacy-Informationen gebündelt und erzeugt idempotente `UserBadge`-Upserts.
+- Ein interner Endpoint (`POST /internal/badges/recompute`) stößt die Vergabe für einzelne Nutzer (`userId`), Listen (`userIds`) oder alle Accounts (`{"all": true}`) an.
+- Bestehende Auszeichnungen werden in einer Transaktion aktualisiert, veraltete Einträge optional widerrufen und mit `revokedAt` markiert.
+- Tests (Vitest) für Badge-Regeln und Orchestrierung laufen via `pnpm --filter nexuslabs-api test`.
+
+### Neue Badge-Regeln hinzufügen
+
+1. Eine neue Regel im Array `badgeRules` anlegen und Kriterien, Priorität und optionale Saison definieren.
+2. Falls zusätzliche Daten benötigt werden, diese im Evaluator (`apps/api/src/badges/evaluator.ts`) bündeln oder über `context.useCache` laden.
+3. Optional Unit-Tests ergänzen (`apps/api/test/badges`).
+4. Recompute ausführen (`POST /internal/badges/recompute`) oder lokal mit Dry-Run (`{"dryRun": true}`) testen.
+
 ## Getting Started
 
 ```bash

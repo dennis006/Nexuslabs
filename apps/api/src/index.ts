@@ -8,6 +8,7 @@ import dbPlugin from "./plugins/db";
 import authRoutes from "./routes/auth";
 import usersRoutes from "./routes/users";
 import { errorHandler } from "./errors";
+import internalBadgeRoutes from "./routes/internal/badges";
 
 const main = async () => {
   const app = Fastify({ logger: true });
@@ -31,6 +32,7 @@ const main = async () => {
 
   await app.register(authRoutes, { prefix: "/auth" });
   await app.register(usersRoutes, { prefix: "/users" });
+  await app.register(internalBadgeRoutes, { prefix: "/internal/badges" });
 
   app.setErrorHandler(errorHandler);
 

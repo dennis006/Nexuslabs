@@ -208,6 +208,8 @@ model UserBadge {
   earnedAt  DateTime @default(now())
   seasonKey String?
   note      String?
+  earnedReason String?
+  revokedAt    DateTime?
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
   badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
