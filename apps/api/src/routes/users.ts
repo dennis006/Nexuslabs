@@ -295,6 +295,25 @@ type SocialLink = {
 
 type ExternalLink = { label: string; url: string };
 
+const KNOWN_OFFICIAL_BADGES = new Set(
+  [
+    "core-team",
+    "operations-lead",
+    "founder",
+    "early-adopter",
+    "verified",
+    "community-champion",
+    "top-poster",
+    "knowledge-sharer",
+    "event-champion",
+    "bug-hunter",
+    "helpful-responder",
+    "mentor",
+    "creative-mind",
+    "community-builder",
+  ].map((slug) => slug.toLowerCase())
+);
+
 const sanitizeSocials = (value: Prisma.JsonValue | null | undefined): SocialLink[] => {
   const array = parseJsonArray<SocialLink>(value);
   return array.map((item) => ({
@@ -309,6 +328,104 @@ const sanitizeSocials = (value: Prisma.JsonValue | null | undefined): SocialLink
 const sanitizeLinks = (value: Prisma.JsonValue | null | undefined): ExternalLink[] => {
   const array = parseJsonArray<ExternalLink>(value);
   return array.map((item) => ({ label: item.label, url: item.url }));
+};
+
+const formatBadgeName = (slug: string) =>
+  slug
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(" ");
+
+type LegacyBadgeMetadata = { label?: string; description?: string };
+
+type ParsedCustomBadge = {
+  link: SocialLink;
+  slugHint: string | null;
+};
+
+const extractProfileBadges = (
+  value: Prisma.JsonValue | null | undefined
+): { legacyOfficial: Map<string, LegacyBadgeMetadata>; custom: ParsedCustomBadge[] } => {
+  const entries = parseJsonArray<unknown>(value);
+  const legacyOfficial = new Map<string, LegacyBadgeMetadata>();
+  const custom: ParsedCustomBadge[] = [];
+
+  entries.forEach((entry, index) => {
+    if (typeof entry === "string") {
+      const slug = entry.trim().toLowerCase();
+      if (slug) {
+        legacyOfficial.set(slug, {});
+      }
+      return;
+    }
+
+    if (entry && typeof entry === "object") {
+      const record = entry as Record<string, unknown>;
+      const slugValue =
+        typeof record.slug === "string"
+          ? record.slug
+          : typeof record.id === "string"
+          ? record.id
+          : undefined;
+      const normalizedSlug = slugValue?.trim().toLowerCase() ?? null;
+      const label = typeof record.label === "string" ? record.label : undefined;
+      const description =
+        typeof record.description === "string" ? record.description : undefined;
+      const url = typeof record.url === "string" ? record.url : undefined;
+      const handle =
+        typeof record.handle === "string"
+          ? record.handle
+          : record.handle === null
+          ? null
+          : undefined;
+      const icon =
+        typeof record.icon === "string"
+          ? record.icon
+          : record.icon === null
+          ? null
+          : undefined;
+      const type = typeof record.type === "string" ? record.type.toLowerCase() : undefined;
+      const kind = typeof record.kind === "string" ? record.kind.toLowerCase() : undefined;
+      const category =
+        typeof record.category === "string" ? record.category.toLowerCase() : undefined;
+
+      if (normalizedSlug) {
+        const flaggedOfficial =
+          KNOWN_OFFICIAL_BADGES.has(normalizedSlug) ||
+          type === "official" ||
+          kind === "official" ||
+          category === "official" ||
+          type === "team" ||
+          kind === "team" ||
+          category === "team";
+
+        if (flaggedOfficial) {
+          legacyOfficial.set(normalizedSlug, { label, description });
+          return;
+        }
+      }
+
+      if (url) {
+        const id =
+          (typeof record.id === "string" && record.id.trim()) ||
+          normalizedSlug ||
+          `legacy-${index}`;
+        custom.push({
+          link: {
+            id,
+            label,
+            url,
+            handle: handle ?? null,
+            icon: icon ?? null,
+          },
+          slugHint: normalizedSlug,
+        });
+      }
+    }
+  });
+
+  return { legacyOfficial, custom };
 };
 
 const buildProfilePayload = (
@@ -328,11 +445,11 @@ const buildProfilePayload = (
 
   const socials = sanitizeSocials(user.profile?.socials ?? null);
   const links = sanitizeLinks(user.profile?.links ?? null);
-  const customBadges = sanitizeSocials(user.profile?.badges ?? null);
+  const { legacyOfficial, custom } = extractProfileBadges(user.profile?.badges ?? null);
   const completion = computeProfileCompletion(user);
   const trust = user.stats?.trustLevel ?? "NEWCOMER";
 
-  const badgeAwards = user.badgeAwards.map((award) => ({
+  const badgeAwardsRaw = user.badgeAwards.map((award) => ({
     id: award.id,
     earnedAt: award.earnedAt,
     seasonKey: award.seasonKey ?? null,
@@ -349,6 +466,55 @@ const buildProfilePayload = (
       endsAt: award.badge.endsAt,
     },
   }));
+
+  const badgeAwardMap = new Map<string, (typeof badgeAwardsRaw)[number]>();
+  badgeAwardsRaw.forEach((award) => {
+    const slugKey = award.badge.slug.toLowerCase();
+    if (!badgeAwardMap.has(slugKey)) {
+      badgeAwardMap.set(slugKey, award);
+    }
+  });
+
+  for (const [slug, info] of legacyOfficial.entries()) {
+    if (!badgeAwardMap.has(slug)) {
+      badgeAwardMap.set(slug, {
+        id: `legacy-${slug}`,
+        earnedAt: user.createdAt,
+        seasonKey: null,
+        note: null,
+        badge: {
+          id: `legacy-${slug}`,
+          slug,
+          name: info.label ?? formatBadgeName(slug),
+          description:
+            info.description ?? "Legacy badge imported from previous profile data.",
+          icon: null,
+          isSeasonal: false,
+          seasonKey: null,
+          startsAt: null,
+          endsAt: null,
+        },
+      });
+    }
+  }
+
+  const badgeAwards = Array.from(badgeAwardMap.values()).sort(
+    (a, b) => new Date(b.earnedAt).getTime() - new Date(a.earnedAt).getTime()
+  );
+
+  const officialSlugs = new Set(badgeAwardMap.keys());
+  const customBadges = custom
+    .filter((entry) => {
+      const normalizedId = entry.link.id.trim().toLowerCase();
+      if (officialSlugs.has(normalizedId)) {
+        return false;
+      }
+      if (entry.slugHint && officialSlugs.has(entry.slugHint)) {
+        return false;
+      }
+      return true;
+    })
+    .map((entry) => entry.link);
 
   const metadata = {
     joinedAt: user.createdAt,
@@ -410,7 +576,7 @@ const buildProfilePayload = (
 
   const verification = {
     email: true,
-    badge: badgeAwards.some((award) => award.badge.slug === "verified"),
+    badge: officialSlugs.has("verified"),
   };
 
   const profile = {
