@@ -1,4 +1,4 @@
-import { useUserStore } from "@/store/userStore";
+import { useUserStore, type TrustLevel } from "@/store/userStore";
 
 const API = import.meta.env.VITE_API_URL ?? "http://localhost:5001";
 
@@ -8,6 +8,14 @@ type SessionUser = {
   username: string;
   role: "MEMBER" | "ADMIN";
   createdAt: string;
+  displayName: string;
+  avatarUrl: string | null;
+  pronouns: string | null;
+  timezone: string | null;
+  language: string | null;
+  lastSeenAt: string | null;
+  reputation: number;
+  trustLevel: TrustLevel;
 };
 
 type AuthResponse = {

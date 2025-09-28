@@ -1,6 +1,13 @@
 import { create } from "zustand";
 
 type Role = "MEMBER" | "ADMIN";
+export type TrustLevel =
+  | "NEWCOMER"
+  | "MEMBER"
+  | "CONTRIBUTOR"
+  | "VETERAN"
+  | "MODERATOR"
+  | "ADMINISTRATOR";
 
 export const SESSION_STORAGE_KEY = "nexuslabs-session";
 
@@ -21,6 +28,14 @@ export type User = {
   email: string;
   username: string;
   role: Role;
+  displayName: string;
+  avatarUrl: string | null;
+  pronouns: string | null;
+  timezone: string | null;
+  language: string | null;
+  lastSeenAt: string | null;
+  trustLevel: TrustLevel;
+  reputation: number;
 };
 
 export type State = {
@@ -32,6 +47,7 @@ type Actions = {
   setSession: (user: User, token: string) => void;
   setAccessToken: (token: string | null) => void;
   clear: () => void;
+  updateUser: (patch: Partial<User>) => void;
 };
 
 export const useUserStore = create<State & Actions>((set) => ({
@@ -43,6 +59,11 @@ export const useUserStore = create<State & Actions>((set) => ({
       return { user, accessToken: token };
     }),
   setAccessToken: (token) => set((state) => ({ ...state, accessToken: token })),
+  updateUser: (patch) =>
+    set((state) => {
+      if (!state.user) return state;
+      return { ...state, user: { ...state.user, ...patch } };
+    }),
   clear: () =>
     set(() => {
       setSessionFlag(false);

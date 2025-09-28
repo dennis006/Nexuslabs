@@ -89,7 +89,7 @@ const Header = () => {
                 ) : (
                   <Sparkles className="mr-2 h-4 w-4" />
                 )}
-                {user ? user.username : t("header.user.guest")}
+                {user ? user.displayName ?? user.username : t("header.user.guest")}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
@@ -97,13 +97,17 @@ const Header = () => {
                 <>
                   <DropdownMenuLabel>
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold">{user.username}</span>
-                      <span className="text-xs text-muted-foreground">{user.email}</span>
+                      <span className="text-sm font-semibold">{user.displayName}</span>
+                      <span className="text-xs text-muted-foreground">@{user.username}</span>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="capitalize text-muted-foreground" disabled>
                     {t("header.role", { role: user.role.toLowerCase() })}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate(`/u/${user.username}`)}>
+                    <ShieldCheck className="mr-2 h-4 w-4" />
+                    {t("header.user.profile", { defaultValue: "Profil" })}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={goToCreate}>

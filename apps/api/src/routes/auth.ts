@@ -1,4 +1,5 @@
 import type { FastifyBaseLogger, FastifyPluginAsync } from "fastify";
+import type { Prisma, TrustLevel } from "@prisma/client";
 import { z } from "zod";
 import argon2 from "argon2";
 
@@ -70,6 +71,44 @@ const Availability = z.object({
   username: z.string().min(3).max(20).regex(/^[A-Za-z0-9_-]+$/).optional(),
 });
 
+const sessionUserSelect = {
+  id: true,
+  email: true,
+  username: true,
+  role: true,
+  createdAt: true,
+  displayName: true,
+  avatarUrl: true,
+  pronouns: true,
+  timezone: true,
+  language: true,
+  lastSeenAt: true,
+  stats: {
+    select: {
+      trustLevel: true,
+      reputation: true,
+    },
+  },
+} satisfies Prisma.UserSelect;
+
+type SessionUserRow = Prisma.UserGetPayload<{ select: typeof sessionUserSelect }>;
+
+const toSessionUser = (user: SessionUserRow) => ({
+  id: user.id,
+  email: user.email,
+  username: user.username,
+  role: user.role,
+  createdAt: user.createdAt,
+  displayName: user.displayName ?? user.username,
+  avatarUrl: user.avatarUrl ?? null,
+  pronouns: user.pronouns ?? null,
+  timezone: user.timezone ?? null,
+  language: user.language ?? null,
+  lastSeenAt: user.lastSeenAt ?? null,
+  reputation: user.stats?.reputation ?? 0,
+  trustLevel: (user.stats?.trustLevel ?? "NEWCOMER") as TrustLevel,
+});
+
 const authRoutes: FastifyPluginAsync = async (app) => {
   const dbg = process.env.DEBUG_ERRORS === "1";
 
@@ -130,15 +169,26 @@ const authRoutes: FastifyPluginAsync = async (app) => {
 
     const hash = await argon2.hash(body.password);
     const user = await app.db.user.create({
-      data: { email, username, passwordHash: hash },
-      select: { id: true, email: true, username: true, role: true, createdAt: true },
+      data: {
+        email,
+        username,
+        passwordHash: hash,
+        displayName: username,
+        lastSeenAt: new Date(),
+        stats: { create: {} },
+        profile: { create: {} },
+        notificationSettings: { create: {} },
+        privacySettings: { create: {} },
+        appearanceSettings: { create: {} },
+      },
+      select: sessionUserSelect,
     });
 
     const access = app.jwt.sign({ sub: user.id, role: user.role }, { expiresIn: "10m" });
     const refresh = app.jwt.sign({ sub: user.id }, { expiresIn: "7d" });
     setRefresh(reply, refresh);
 
-    return reply.send({ user, accessToken: access });
+    return reply.send({ user: toSessionUser(user), accessToken: access });
   });
 
   app.post("/login", async (req, reply) => {
@@ -163,12 +213,8 @@ const authRoutes: FastifyPluginAsync = async (app) => {
         ],
       },
       select: {
-        id: true,
-        email: true,
-        username: true,
-        role: true,
+        ...sessionUserSelect,
         passwordHash: true,
-        createdAt: true,
       },
     });
 
@@ -214,7 +260,7 @@ const authRoutes: FastifyPluginAsync = async (app) => {
     setRefresh(reply, refresh);
 
     const { passwordHash, ...safeUser } = user;
-    return reply.send({ user: safeUser, accessToken: access });
+    return reply.send({ user: toSessionUser(safeUser), accessToken: access });
   });
 
   app.post("/refresh", async (req, reply) => {
@@ -227,7 +273,7 @@ const authRoutes: FastifyPluginAsync = async (app) => {
       const payload = app.jwt.verify(token) as { sub: string };
       const user = await app.db.user.findUnique({
         where: { id: payload.sub },
-        select: { id: true, email: true, username: true, role: true, createdAt: true },
+        select: sessionUserSelect,
       });
 
       if (!user) {
@@ -235,7 +281,7 @@ const authRoutes: FastifyPluginAsync = async (app) => {
       }
 
       const access = app.jwt.sign({ sub: user.id, role: user.role }, { expiresIn: "10m" });
-      return reply.send({ accessToken: access, user });
+      return reply.send({ accessToken: access, user: toSessionUser(user) });
     } catch (error) {
       if (dbg) {
         req.log.warn({ error }, "refresh invalid");
@@ -261,14 +307,14 @@ const authRoutes: FastifyPluginAsync = async (app) => {
       const payload = app.jwt.verify(token) as { sub: string };
       const user = await app.db.user.findUnique({
         where: { id: payload.sub },
-        select: { id: true, email: true, username: true, role: true, createdAt: true },
+        select: sessionUserSelect,
       });
 
       if (!user) {
         return reply.code(401).send({ error: "NO_USER" });
       }
 
-      return reply.send({ user });
+      return reply.send({ user: toSessionUser(user) });
     } catch (error) {
       if (dbg) {
         req.log.warn({ error }, "me invalid token");
