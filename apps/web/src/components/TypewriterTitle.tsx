@@ -20,7 +20,9 @@ export default function TypewriterTitle({
   underline = true
 }: Props) {
   const reduce = useReducedMotion();
-  const [out, setOut] = useState(reduce ? text : "");
+  const [typed, setTyped] = useState<Array<{ char: string; id: number }>>(() =>
+    reduce ? text.split("").map((char, index) => ({ char, id: index })) : []
+  );
   const iRef = useRef(0);
   const done = iRef.current >= text.length;
 
@@ -28,9 +30,16 @@ export default function TypewriterTitle({
   const spaces = useMemo(() => new Set([" ", "\n", "\t"]), []);
 
   useEffect(() => {
-    if (reduce) return;
+    if (reduce) {
+      setTyped(text.split("").map((char, index) => ({ char, id: index })));
+      iRef.current = text.length;
+      return;
+    }
     let t: number | undefined;
     let cancelled = false;
+
+    setTyped([]);
+    iRef.current = 0;
 
     const tick = (first = false) => {
       if (cancelled) return;
@@ -46,7 +55,7 @@ export default function TypewriterTitle({
 
       t = window.setTimeout(() => {
         if (cancelled) return;
-        setOut((v) => v + ch);
+        setTyped((prev) => [...prev, { char: ch, id: iRef.current }]);
         iRef.current += 1;
         tick();
       }, delay);
@@ -59,7 +68,7 @@ export default function TypewriterTitle({
     };
   }, [text, minSpeed, maxSpeed, startDelay, extraPause, spaces, reduce]);
 
-  const progress = text.length ? (out.length / text.length) * 100 : 100;
+  const progress = text.length ? (typed.length / text.length) * 100 : 100;
 
   return (
     <div className={clsx("relative inline-block", className)}>
@@ -70,10 +79,26 @@ export default function TypewriterTitle({
           "text-[#E7F9FF] drop-shadow-[0_2px_20px_rgba(0,200,255,0.15)]"
         )}
       >
-        <span className="opacity-40 select-none">{text}</span>
+        <span className="pointer-events-none select-none text-transparent whitespace-pre-wrap">
+          {text}
+        </span>
         <span className="absolute inset-0">
-          <span className="text-[#E7F9FF]">
-            {out}
+          <span className="text-[#E7F9FF] whitespace-pre-wrap">
+            {reduce
+              ? text
+              : typed.map(({ char, id }) => (
+                  <motion.span
+                    key={id}
+                    initial={{ y: "-0.25em", opacity: 0, filter: "blur(6px)" }}
+                    animate={{ y: "0em", opacity: 1, filter: "blur(0px)" }}
+                    transition={{
+                      duration: 0.18,
+                      ease: [0.12, 0.85, 0.23, 1.02]
+                    }}
+                  >
+                    {char === " " ? " " : char}
+                  </motion.span>
+                ))}
             {!reduce && !done && (
               <motion.span
                 aria-hidden
