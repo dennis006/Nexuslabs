@@ -110,56 +110,60 @@ export default function HeroSection() {
       )}
 
       {/* Foreground-Content */}
-      <div className="relative z-10 mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24 text-center">
-        {/* === BADGE ÜBER DER ÜBERSCHRIFT === */}
-        <Link
-          to="/forum"
-          className="mx-auto mb-5 inline-flex w-auto items-center gap-2 rounded-full
-                     border border-primary/40 bg-primary/10 px-3 py-1
-                     text-xs font-semibold tracking-wide text-primary
-                     shadow-[0_0_20px_rgba(34,211,238,0.15)] dark:shadow-[0_0_20px_rgba(34,211,238,0.15)]"
-          aria-label={t("landing.hero.badge")}
-        >
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
-          {t("landing.hero.badge")}
-        </Link>
-
-        {/* === HEADLINE === */}
-        <TypewriterTitle text={t("landing.hero.headline")} className="mx-auto inline-block" />
-
-        {/* === SUBCOPY === */}
-        <p className="mx-auto mt-6 max-w-[820px] text-base sm:text-lg leading-relaxed text-muted-foreground">
-          {t("landing.hero.subcopy")}
-        </p>
-
-        {/* === CTAS === */}
-        <div className="mt-8 flex items-center justify-center gap-3">
+      <div className="relative z-10 mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+        <div className="flex flex-col items-center text-center space-y-6">
+          {/* === BADGE ÜBER DER ÜBERSCHRIFT === */}
           <Link
             to="/forum"
-            className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3
-                       font-semibold text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="inline-flex items-center gap-2 rounded-full
+                       border border-primary/40 bg-primary/10 px-3 py-1
+                       text-xs font-semibold tracking-wide text-primary
+                       shadow-[0_0_20px_rgba(34,211,238,0.15)] dark:shadow-[0_0_20px_rgba(34,211,238,0.15)]"
+            aria-label={t("landing.hero.badge")}
           >
-            {t("landing.hero.primaryCta")}
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+            {t("landing.hero.badge")}
           </Link>
-          <Link
-            to="/register"
-            className="inline-flex items-center justify-center rounded-xl border border-border px-5 py-3
-                       font-semibold text-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            {t("landing.hero.secondaryCta")}
-          </Link>
-        </div>
 
-        {/* === STATISTIKEN === */}
-        {stats && (
-          <p className="mt-6 text-sm uppercase tracking-wide text-muted-foreground">
-            {t("landing.hero.stats", {
-              users: stats.usersTotal.toLocaleString(locale),
-              online: stats.usersOnline.toLocaleString(locale),
-              threads: stats.threadsTotal.toLocaleString(locale)
-            })}
+          {/* === HEADLINE === */}
+          <div className="w-full flex justify-center">
+            <TypewriterTitle text={t("landing.hero.headline")} />
+          </div>
+
+          {/* === SUBCOPY === */}
+          <p className="max-w-[820px] text-base sm:text-lg leading-relaxed text-muted-foreground">
+            {t("landing.hero.subcopy")}
           </p>
-        )}
+
+          {/* === CTAS === */}
+          <div className="flex items-center justify-center gap-3">
+            <Link
+              to="/forum"
+              className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3
+                         font-semibold text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              {t("landing.hero.primaryCta")}
+            </Link>
+            <Link
+              to="/register"
+              className="inline-flex items-center justify-center rounded-xl border border-border px-5 py-3
+                         font-semibold text-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              {t("landing.hero.secondaryCta")}
+            </Link>
+          </div>
+
+          {/* === STATISTIKEN === */}
+          {stats && (
+            <p className="text-sm uppercase tracking-wide text-muted-foreground">
+              {t("landing.hero.stats", {
+                users: stats.usersTotal.toLocaleString(locale),
+                online: stats.usersOnline.toLocaleString(locale),
+                threads: stats.threadsTotal.toLocaleString(locale)
+              })}
+            </p>
+          )}
+        </div>
       </div>
     </section>
   );

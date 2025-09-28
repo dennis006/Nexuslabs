@@ -89,15 +89,15 @@ export default function TypewriterTitle({
   const progress = text.length ? (typed.length / text.length) * 100 : 100;
 
   return (
-    <div className={clsx("relative inline-block", className)}>
-      <h1
-        className={clsx(
-          "relative z-10 font-extrabold tracking-tight",
-          "text-[clamp(32px,6vw,72px)] leading-[1.05]",
-          "text-foreground drop-shadow-[0_1px_12px_rgba(56,189,248,0.18)]",
-          "dark:text-[#E7F9FF] dark:drop-shadow-[0_2px_20px_rgba(0,200,255,0.15)]"
-        )}
-      >
+    <div className={clsx("relative", className)}>
+        <h1
+          className={clsx(
+            "relative z-10 font-extrabold tracking-tight",
+            "text-[clamp(32px,6vw,72px)] leading-[1.05]",
+            "text-foreground drop-shadow-[0_1px_12px_rgba(56,189,248,0.18)]",
+            "dark:text-[#E7F9FF] dark:drop-shadow-[0_2px_20px_rgba(0,200,255,0.15)]"
+          )}
+        >
         <span className="pointer-events-none select-none text-transparent whitespace-pre-wrap">
           {text}
         </span>

@@ -8,7 +8,7 @@ export const translations = {
     "themeToggle.label": "Designmodus wechseln",
     "languageToggle.label": "Sprache auswählen",
     "landing.hero.badge": "NEXUSLABS – THE NEXT-GEN GAMING FORUM",
-    "landing.hero.headline": "Verbinde dich mit der Elite der Gaming-Community",
+    "landing.hero.headline": "Verbinde dich mit der Elite der\ngaming-Community",
     "landing.hero.subcopy":
       "Diskutiere Meta-Strategien, organisiere Scrims und erhalte Insights direkt aus der Szene. Mit Live-Presence, animierten Statistiken und einem Dock-Chat bleibst du immer verbunden.",
     "landing.hero.primaryCta": "Forum betreten →",
@@ -182,7 +182,7 @@ export const translations = {
     "themeToggle.label": "Toggle theme",
     "languageToggle.label": "Select language",
     "landing.hero.badge": "NEXUSLABS – THE NEXT-GEN GAMING FORUM",
-    "landing.hero.headline": "Connect with the elite of the gaming community",
+    "landing.hero.headline": "Connect with the elite of the\ngaming community",
     "landing.hero.subcopy":
       "Discuss meta strategies, schedule scrims, and get insights straight from the scene. With live presence, animated stats, and a dock chat you're always connected.",
     "landing.hero.primaryCta": "Enter forum →",
