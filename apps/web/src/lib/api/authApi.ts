@@ -56,6 +56,31 @@ export async function register(data: { email: string; username: string; password
   return jsonOrThrow<AuthResponse>(response);
 }
 
+export async function checkAvailability(payload: { email?: string; username?: string }) {
+  const res = await fetch(`${API}/auth/availability`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload)
+  });
+
+  const data = (await res
+    .json()
+    .catch(() => ({}))) as { message?: unknown; email?: unknown; username?: unknown };
+
+  if (!res.ok) {
+    const message = typeof data.message === "string" && data.message.length > 0
+      ? data.message
+      : "Verfügbarkeitsprüfung fehlgeschlagen";
+    throw new Error(message);
+  }
+
+  return data as {
+    email: "available" | "taken" | "skip";
+    username: "available" | "taken" | "skip";
+  };
+}
+
 export async function login(data: { emailOrUsername: string; password: string }) {
   const response = await fetch(`${API}/auth/login`, {
     method: "POST",

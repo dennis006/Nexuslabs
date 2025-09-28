@@ -65,6 +65,11 @@ const Login = z.object({
   password: z.string().min(8),
 });
 
+const Availability = z.object({
+  email: z.string().email().optional(),
+  username: z.string().min(3).max(20).regex(/^[A-Za-z0-9_-]+$/).optional(),
+});
+
 const authRoutes: FastifyPluginAsync = async (app) => {
   const dbg = process.env.DEBUG_ERRORS === "1";
 
@@ -78,9 +83,33 @@ const authRoutes: FastifyPluginAsync = async (app) => {
     });
   }
 
+  app.post("/availability", async (req, reply) => {
+    const { email, username } = Availability.parse(req.body);
+
+    const emailKey = email?.trim().toLowerCase();
+    const usernameKey = username?.trim();
+
+    const [emailHit, usernameHit] = await Promise.all([
+      emailKey
+        ? app.db.user.findFirst({ where: { email: emailKey }, select: { id: true } })
+        : Promise.resolve(null),
+      usernameKey
+        ? app.db.user.findFirst({
+            where: { username: { equals: usernameKey, mode: "insensitive" } },
+            select: { id: true },
+          })
+        : Promise.resolve(null),
+    ]);
+
+    return reply.send({
+      email: email ? (emailHit ? "taken" : "available") : "skip",
+      username: username ? (usernameHit ? "taken" : "available") : "skip",
+    });
+  });
+
   app.post("/register", async (req, reply) => {
     const body = Register.parse(req.body);
-    const email = body.email.toLowerCase();
+    const email = body.email.trim().toLowerCase();
     const username = body.username.trim();
 
     const exists = await app.db.user.findFirst({
