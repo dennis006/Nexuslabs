@@ -237,30 +237,33 @@ WHERE NOT EXISTS (SELECT 1 FROM public."UserAppearanceSetting" ua WHERE ua."user
 DO $$
 DECLARE
   v_admin_id TEXT;
-  v_founder_badge TEXT;
-  v_verified_badge TEXT;
+  v_core_team_badge TEXT;
+  v_operations_badge TEXT;
 BEGIN
-  INSERT INTO public."User" (id, email, username, "passwordHash", role, "displayName", pronouns, timezone, language, website, bio, signature, location, "createdAt", "updatedAt", "lastSeenAt")
+  INSERT INTO public."User" (id, email, username, "passwordHash", role, "displayName", pronouns, timezone, language, website, bio, signature, location, "avatarUrl", "coverImage", "createdAt", "updatedAt", "lastSeenAt")
   VALUES (
     gen_random_uuid()::text,
-    lower('dennis-schimpf18@live.de'),
-    'xMethface',
+    lower('dennis@nexuslabs.gg'),
+    'dennis',
     crypt('Admin!234', gen_salt('bf', 12)),
     'ADMIN',
     'Dennis Schimpf',
-    'er/ihn',
+    'er/ihm',
     'Europe/Berlin',
     'de',
     'https://nexuslabs.gg',
-    'Admin bei NexusLabs – hier für Ordnung und neue Features.',
-    'Stay curious. Stay kind.',
-    'Deutschland',
+    'Operations Lead bei NexusLabs. Verantwortlich für Partnerschaften, Sicherheit und Produktstrategie.',
+    'Live-Service Insights & Community Ops.',
+    'Hamburg, Deutschland',
+    'https://cdn.nexuslabs.gg/avatars/dennis-schimpf.jpg',
+    'https://cdn.nexuslabs.gg/banners/nexuslabs-control-room.jpg',
     now(),
     now(),
     now()
   )
   ON CONFLICT (email) DO UPDATE
     SET role = 'ADMIN',
+        username = 'dennis',
         "displayName" = EXCLUDED."displayName",
         pronouns = EXCLUDED.pronouns,
         timezone = EXCLUDED.timezone,
@@ -269,38 +272,47 @@ BEGIN
         bio = EXCLUDED.bio,
         signature = EXCLUDED.signature,
         location = EXCLUDED.location,
+        "avatarUrl" = EXCLUDED."avatarUrl",
+        "coverImage" = EXCLUDED."coverImage",
         "lastSeenAt" = now()
   RETURNING id INTO v_admin_id;
 
   IF v_admin_id IS NULL THEN
-    SELECT id INTO v_admin_id FROM public."User" WHERE email = lower('dennis-schimpf18@live.de');
+    SELECT id INTO v_admin_id FROM public."User" WHERE email = lower('dennis@nexuslabs.gg');
   END IF;
 
   UPDATE public."UserStats"
-    SET topics = 18,
-        posts = 142,
-        "likesGiven" = 96,
-        "likesReceived" = 220,
-        reputation = 1280,
+    SET topics = 32,
+        posts = 214,
+        "likesGiven" = 184,
+        "likesReceived" = 562,
+        reputation = 1760,
         "trustLevel" = 'ADMINISTRATOR',
+        "streakDays" = 12,
+        "longestStreak" = 45,
+        "streakUpdatedAt" = now(),
         "lastActiveAt" = now()
   WHERE "userId" = v_admin_id;
 
   UPDATE public."UserProfile"
-    SET bio = 'Head of NexusLabs Operations.',
-        about = 'Ich kümmere mich um Community-Sicherheit, neue Features und Events. Bei Fragen oder Ideen gerne direkt anschreiben.',
-        interests = 'Live-Service-Meta, Strategie-Games, Community Design',
+    SET bio = 'Operations Lead bei NexusLabs.',
+        about = 'Ich begleite Publisher und Creator bei Live-Service-Projekten, leite unser Operationsteam und moderiere kritische Eskalationen.',
+        interests = 'Live-Service-Strategie, Competitive Gaming, Community Ops, Partnerships',
         socials = jsonb_build_array(
-          jsonb_build_object('id','discord','label','Discord','url','https://discordapp.com/users/198765432','handle','xMethface','icon','discord'),
-          jsonb_build_object('id','github','label','GitHub','url','https://github.com/xMethface','handle','@xMethface','icon','github')
+          jsonb_build_object('id','linkedin','label','LinkedIn','url','https://www.linkedin.com/in/dennisschimpf/','handle','dennisschimpf','icon','linkedin'),
+          jsonb_build_object('id','x','label','X (Twitter)','url','https://twitter.com/NexusLabsHQ','handle','@NexusLabsHQ','icon','twitter'),
+          jsonb_build_object('id','discord','label','Discord','url','https://discord.com/users/3344556677889900','handle','dennis','icon','discord')
         ),
         links = jsonb_build_array(
-          jsonb_build_object('label','Team-Seite','url','https://nexuslabs.gg/team'),
-          jsonb_build_object('label','Roadmap','url','https://nexuslabs.gg/roadmap')
+          jsonb_build_object('label','Roadmap','url','https://nexuslabs.gg/roadmap'),
+          jsonb_build_object('label','Partner Portal','url','https://nexuslabs.gg/partners'),
+          jsonb_build_object('label','Pressekit','url','https://nexuslabs.gg/press')
         ),
         badges = jsonb_build_array(
-          jsonb_build_object('id','season-founder','label','Season 0 Founder','url','https://nexuslabs.gg/badges/founder','handle',NULL,'icon','trophy')
-        )
+          jsonb_build_object('id','core-team','label','Core Team','url','https://nexuslabs.gg/badges/core-team','handle',NULL,'icon','shield'),
+          jsonb_build_object('id','operations-lead','label','Operations Lead','url','https://nexuslabs.gg/badges/operations-lead','handle',NULL,'icon','workflow')
+        ),
+        "updatedAt" = now()
   WHERE "userId" = v_admin_id;
 
   UPDATE public."UserNotificationSetting"
@@ -326,35 +338,36 @@ BEGIN
   UPDATE public."UserAppearanceSetting"
     SET theme = 'DARK',
         density = 'COMFORTABLE',
-        accent = '#7C3AED',
+        accent = '#4C1D95',
         language = 'de',
         "timeFormat" = 'H24'
   WHERE "userId" = v_admin_id;
 
   INSERT INTO public."Badge" (id, slug, name, description, icon, "isSeasonal")
   VALUES
-    (gen_random_uuid()::text, 'founder', 'Founder', 'Früh dabei im NexusLabs Projekt.', 'Rocket', false),
-    (gen_random_uuid()::text, 'verified', 'Verifiziert', 'Offiziell verifiziertes Team-Mitglied.', 'ShieldCheck', false)
+    (gen_random_uuid()::text, 'core-team', 'Core Team', 'Bestätigtes Mitglied des NexusLabs Kernteams.', 'ShieldCheck', false),
+    (gen_random_uuid()::text, 'operations-lead', 'Operations Lead', 'Verantwortlich für Operations und Community-Sicherheit.', 'Workflow', false)
   ON CONFLICT (slug) DO UPDATE
     SET name = EXCLUDED.name,
         description = EXCLUDED.description,
         icon = EXCLUDED.icon;
 
-  SELECT id INTO v_founder_badge FROM public."Badge" WHERE slug = 'founder';
-  SELECT id INTO v_verified_badge FROM public."Badge" WHERE slug = 'verified';
+  SELECT id INTO v_core_team_badge FROM public."Badge" WHERE slug = 'core-team';
+  SELECT id INTO v_operations_badge FROM public."Badge" WHERE slug = 'operations-lead';
 
   INSERT INTO public."UserBadge" (id, "userId", "badgeId", "earnedAt", "seasonKey", note)
   VALUES
-    (gen_random_uuid()::text, v_admin_id, v_founder_badge, now() - INTERVAL '180 days', NULL, 'Crew since Season 0'),
-    (gen_random_uuid()::text, v_admin_id, v_verified_badge, now() - INTERVAL '30 days', NULL, 'Team Verifizierung')
+    (gen_random_uuid()::text, v_admin_id, v_core_team_badge, now() - INTERVAL '240 days', NULL, 'Kernteam seit Season 0'),
+    (gen_random_uuid()::text, v_admin_id, v_operations_badge, now() - INTERVAL '90 days', NULL, 'Leitet Operations & Moderation')
   ON CONFLICT ("userId", "badgeId", "seasonKey") DO UPDATE
     SET "earnedAt" = EXCLUDED."earnedAt",
         note = EXCLUDED.note;
 
   INSERT INTO public."ConnectedAccount" (id, "userId", provider, "providerId", "displayName", "profileUrl", verified, metadata, "linkedAt")
   VALUES
-    (gen_random_uuid()::text, v_admin_id, 'DISCORD', 'xMethface#0001', 'xMethface', 'https://discordapp.com/users/198765432', true, jsonb_build_object('server','NexusLabs HQ'), now()),
-    (gen_random_uuid()::text, v_admin_id, 'GITHUB', 'xMethface', 'Dennis Schimpf', 'https://github.com/xMethface', true, jsonb_build_object('repos', 12), now())
+    (gen_random_uuid()::text, v_admin_id, 'DISCORD', '3344556677889900', 'Dennis', 'https://discord.com/users/3344556677889900', true, jsonb_build_object('server','NexusLabs HQ'), now()),
+    (gen_random_uuid()::text, v_admin_id, 'LINKEDIN', 'dennisschimpf', 'Dennis Schimpf', 'https://www.linkedin.com/in/dennisschimpf/', true, jsonb_build_object('headline','Operations Lead @ NexusLabs'), now()),
+    (gen_random_uuid()::text, v_admin_id, 'GITHUB', 'dennisschimpf', 'Dennis Schimpf', 'https://github.com/dennisschimpf', true, jsonb_build_object('repos', 24), now())
   ON CONFLICT ("userId", provider) DO UPDATE
     SET "displayName" = EXCLUDED."displayName",
         "profileUrl" = EXCLUDED."profileUrl",
