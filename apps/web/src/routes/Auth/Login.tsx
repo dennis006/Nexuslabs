@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { login } from "@/lib/api/authApi";
 import { useUserStore } from "@/store/userStore";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ const Login = () => {
   const [form, setForm] = useState({ emailOrUsername: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (user && token) {
@@ -34,15 +36,15 @@ const Login = () => {
     try {
       const response = await login(form);
       setSession(response.user, response.accessToken);
-      toast.success(`Willkommen zurück, ${response.user.username}!`);
+      toast.success(t("auth.login.success", { name: response.user.username }));
       const redirect = searchParams.get("redirectTo") || "/forum";
       navigate(redirect, { replace: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "login_failed";
       if (message === "INVALID_CREDENTIALS") {
-        toast.error("E-Mail/Benutzername oder Passwort sind falsch.");
+        toast.error(t("auth.login.invalid"));
       } else {
-        toast.error("Login fehlgeschlagen");
+        toast.error(t("auth.login.error"));
       }
     } finally {
       setLoading(false);
@@ -66,13 +68,13 @@ const Login = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <motion.h1 
+            <motion.h1
               className="text-2xl font-bold"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.4 }}
             >
-              Willkommen zurück
+              {t("auth.login.heading")}
             </motion.h1>
             <motion.p 
               className="text-sm text-muted-foreground"
@@ -80,7 +82,7 @@ const Login = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.4 }}
             >
-              Melde dich an, um mitzudiskutieren.
+              {t("auth.login.subtitle")}
             </motion.p>
           </motion.div>
 
@@ -98,7 +100,7 @@ const Login = () => {
               transition={{ delay: 0.6, duration: 0.4 }}
             >
               <label className="text-sm font-medium text-muted-foreground" htmlFor="emailOrUsername">
-                E-Mail oder Benutzername
+                {t("auth.login.email")}
               </label>
               <motion.div
                 whileFocus={{ scale: 1.02 }}
@@ -124,7 +126,7 @@ const Login = () => {
               transition={{ delay: 0.7, duration: 0.4 }}
             >
               <label className="text-sm font-medium text-muted-foreground" htmlFor="password">
-                Passwort
+                {t("auth.login.password")}
               </label>
               <motion.div 
                 className="relative"
@@ -200,7 +202,7 @@ const Login = () => {
                       className="flex items-center gap-2"
                     >
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Wird geprüft...
+                      {t("auth.login.loading")}
                     </motion.div>
                   ) : (
                     <motion.div
@@ -211,7 +213,7 @@ const Login = () => {
                       className="flex items-center gap-2"
                     >
                       <LogIn className="h-4 w-4" />
-                      Login
+                      {t("auth.login.submit")}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -234,13 +236,13 @@ const Login = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.9, duration: 0.4 }}
           >
-            Noch kein Konto?{' '}
+            {t("auth.login.noAccount")}{' '}
             <motion.span
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <Link to="/register" className="text-primary hover:underline">
-                Registrieren
+                {t("auth.login.register")}
               </Link>
             </motion.span>
           </motion.p>

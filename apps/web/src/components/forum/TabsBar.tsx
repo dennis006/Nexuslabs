@@ -1,12 +1,13 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { useUiStore } from "@/store/uiStore";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 const tabs = [
-  { value: "new", label: "Neu" },
-  { value: "top", label: "Top" },
-  { value: "active", label: "Aktiv" },
-  { value: "unread", label: "Ungelesen" }
+  { value: "new", labelKey: "forum.tabs.new" as const },
+  { value: "top", labelKey: "forum.tabs.top" as const },
+  { value: "active", labelKey: "forum.tabs.active" as const },
+  { value: "unread", labelKey: "forum.tabs.unread" as const }
 ] as const;
 
 interface TabsBarProps {
@@ -16,6 +17,7 @@ interface TabsBarProps {
 const TabsBar = ({ onChange }: TabsBarProps) => {
   const active = useUiStore((state) => state.activeTab);
   const setActive = useUiStore((state) => state.setActiveTab);
+  const { t } = useTranslation();
 
   const handleChange = (value: string) => {
     setActive(value as typeof active);
@@ -38,7 +40,7 @@ const TabsBar = ({ onChange }: TabsBarProps) => {
                 transition={{ type: "spring", stiffness: 500, damping: 35 }}
               />
             )}
-            <span className="relative z-10">{tab.label}</span>
+            <span className="relative z-10">{t(tab.labelKey)}</span>
           </TabsTrigger>
         ))}
       </TabsList>

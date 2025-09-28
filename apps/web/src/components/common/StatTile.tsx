@@ -9,17 +9,22 @@ interface StatTileProps {
   value: number;
   icon: LucideIcon;
   accent?: string;
+  locale?: string;
 }
 
-const StatTile = ({ label, value, icon: Icon, accent = "from-primary/40 to-secondary/40" }: StatTileProps) => {
+const StatTile = ({ label, value, icon: Icon, accent = "from-primary/40 to-secondary/40", locale = "de-DE" }: StatTileProps) => {
   const density = useUiStore((state) => state.density);
   const count = useMotionValue(0);
-  const rounded = useTransform(count, (latest) => Math.round(latest).toLocaleString("de-DE"));
+  const rounded = useTransform(count, (latest) => Math.round(latest).toLocaleString(locale));
 
   useEffect(() => {
     const controls = animate(count, value, { duration: 0.9, ease: [0.22, 1, 0.36, 1] });
     return () => controls.stop();
   }, [count, value]);
+
+  useEffect(() => {
+    rounded.set(Math.round(count.get()).toLocaleString(locale));
+  }, [locale, rounded, count]);
 
   return (
     <motion.div

@@ -4,6 +4,7 @@ import Footer from "./Footer";
 import SidebarLeftStats from "./SidebarLeftStats";
 import SidebarRightTrends from "./SidebarRightTrends";
 import { useUiStore } from "@/store/uiStore";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 import {
   Sheet,
   SheetClose,
@@ -18,6 +19,7 @@ const RootLayout = ({ children }: PropsWithChildren) => {
   const toggleLeft = useUiStore((state) => state.toggleSidebarLeft);
   const toggleRight = useUiStore((state) => state.toggleSidebarRight);
   const density = useUiStore((state) => state.density);
+  const { t } = useTranslation();
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -29,12 +31,12 @@ const RootLayout = ({ children }: PropsWithChildren) => {
       <Sheet open={sidebarLeftOpen} onOpenChange={(open) => toggleLeft(open)}>
         <SheetContent className="left-0 right-auto w-full max-w-sm border-r">
           <SheetHeader>
-            <SheetTitle>Statistiken</SheetTitle>
+            <SheetTitle>{t("sidebar.stats")}</SheetTitle>
           </SheetHeader>
           <div className="mt-6 space-y-4 md:space-y-5">
             <SidebarLeftStats />
             <SheetClose className="mt-4 rounded-md border border-border/60 px-4 py-2 text-sm">
-              Schließen
+              {t("sidebar.close")}
             </SheetClose>
           </div>
         </SheetContent>
@@ -43,12 +45,12 @@ const RootLayout = ({ children }: PropsWithChildren) => {
       <Sheet open={sidebarRightOpen} onOpenChange={(open) => toggleRight(open)}>
         <SheetContent>
           <SheetHeader>
-            <SheetTitle>Trends &amp; Highlights</SheetTitle>
+            <SheetTitle>{t("sidebar.trends")}</SheetTitle>
           </SheetHeader>
           <div className="mt-6 space-y-4 md:space-y-5">
             <SidebarRightTrends />
             <SheetClose className="mt-4 rounded-md border border-border/60 px-4 py-2 text-sm">
-              Schließen
+              {t("sidebar.close")}
             </SheetClose>
           </div>
         </SheetContent>

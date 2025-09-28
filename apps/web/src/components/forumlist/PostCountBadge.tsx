@@ -1,14 +1,17 @@
 import { cn } from "@/lib/utils/cn";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 export function PostCountBadge({
   count,
-  label = "posts",
+  label,
   className
 }: {
   count: number;
   label?: string;
   className?: string;
 }) {
+  const { t, locale } = useTranslation();
+  const displayLabel = label ?? t("forumlist.posts");
   return (
     <div
       className={cn(
@@ -17,8 +20,8 @@ export function PostCountBadge({
         className
       )}
     >
-      <div className="text-xl font-semibold tabular-nums">{count}</div>
-      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
+      <div className="text-xl font-semibold tabular-nums">{count.toLocaleString(locale)}</div>
+      <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{displayLabel}</div>
     </div>
   );
 }

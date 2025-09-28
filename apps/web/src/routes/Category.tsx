@@ -9,12 +9,14 @@ import EmptyState from "@/components/forum/EmptyState";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUserStore } from "@/store/userStore";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
+import type { TranslationKey } from "@/lib/i18n/translations";
 
-const sortOptions = [
-  { value: "new", label: "Neueste" },
-  { value: "oldest", label: "Älteste" },
-  { value: "hottest", label: "Meiste Antworten" },
-  { value: "active", label: "Aktiv" }
+const sortOptions: Array<{ value: "new" | "oldest" | "hottest" | "active"; labelKey: TranslationKey }> = [
+  { value: "new", labelKey: "category.newest" },
+  { value: "oldest", labelKey: "category.oldest" },
+  { value: "hottest", labelKey: "category.hottest" },
+  { value: "active", labelKey: "category.active" }
 ] as const;
 
 const Category = () => {
@@ -25,6 +27,7 @@ const Category = () => {
   const { categories, threads, loadingThreads, error, fetchCategories, fetchThreads } = useForumStore();
   const user = useUserStore((state) => state.user);
   const canPost = Boolean(user);
+  const { t, locale } = useTranslation();
 
   const category = useMemo(() => categories.find((c) => c.id === categoryId), [categories, categoryId]);
 
@@ -61,12 +64,14 @@ const Category = () => {
                   : navigate(`/login?redirectTo=${encodeURIComponent(location.pathname + location.search)}`)
               }
             >
-              {canPost ? "Neuer Thread" : "Login erforderlich"}
+              {canPost ? t("category.newThread") : t("category.loginRequired")}
             </Button>
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <p className="text-sm text-muted-foreground">{threads.length} Threads</p>
+            <p className="text-sm text-muted-foreground">
+              {t("category.threadCount", { count: threads.length.toLocaleString(locale) })}
+            </p>
             <div className="relative">
               <select
                 value={sort}
@@ -75,7 +80,7 @@ const Category = () => {
               >
                 {sortOptions.map((option) => (
                   <option key={option.value} value={option.value}>
-                    {option.label}
+                    {t(option.labelKey)}
                   </option>
                 ))}
               </select>
@@ -87,7 +92,7 @@ const Category = () => {
         {loadingThreads && threads.length === 0 ? (
           <LoadingSkeleton />
         ) : error && threads.length === 0 ? (
-          <ErrorState message={error} onRetry={() => fetchThreads({ categoryId, sort })} />
+          <ErrorState message={error ?? t("forum.error.generic") } onRetry={() => fetchThreads({ categoryId, sort })} />
         ) : threads.length === 0 ? (
           <EmptyState />
         ) : (

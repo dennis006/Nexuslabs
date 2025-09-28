@@ -5,6 +5,7 @@ import type { ForumSection } from "@/lib/api/types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils/cn";
 import { ForumRow } from "./ForumRow";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 type SectionProps = {
   section: ForumSection;
@@ -13,6 +14,7 @@ type SectionProps = {
 
 export function Section({ section, defaultOpen = true }: SectionProps) {
   const [open, setOpen] = useState(defaultOpen);
+  const { t } = useTranslation();
 
   return (
     <div className="rounded-2xl border border-border/60 bg-card/60 backdrop-blur">
@@ -27,7 +29,7 @@ export function Section({ section, defaultOpen = true }: SectionProps) {
           variant="ghost"
           size="icon"
           className="rounded-full"
-          aria-label={open ? "Collapse" : "Expand"}
+          aria-label={open ? t("forumlist.collapse") : t("forumlist.expand")}
           aria-expanded={open}
           onClick={() => setOpen((prev) => !prev)}
         >

@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogIn, LogOut, Menu, MessageSquarePlus, ShieldCheck, Sparkles, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import ThemeToggle from "@/components/common/ThemeToggle";
+import LanguageToggle from "@/components/common/LanguageToggle";
 import SearchBar from "@/components/common/SearchBar";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +17,7 @@ import { useUiStore } from "@/store/uiStore";
 import { useUserStore } from "@/store/userStore";
 import { logout } from "@/lib/api/authApi";
 import logo from "@/assets/logos/nexuslabs-logo.svg";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -26,14 +28,15 @@ const Header = () => {
   const toggleDensity = useUiStore((state) => state.toggleDensity);
   const user = useUserStore((state) => state.user);
   const clearSession = useUserStore((state) => state.clear);
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     try {
       await logout();
-      toast.success("Du bist abgemeldet.");
+      toast.success(t("header.logout.success"));
     } catch (error) {
       console.error(error);
-      toast.error("Logout fehlgeschlagen, Sitzung lokal beendet.");
+      toast.error(t("header.logout.error"));
     } finally {
       clearSession();
       navigate("/", { replace: true });
@@ -55,7 +58,7 @@ const Header = () => {
         <button
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-border/60 bg-background/60 text-muted-foreground lg:hidden"
           onClick={() => toggleLeft(true)}
-          aria-label="Statistik Sidebar öffnen"
+          aria-label={t("header.openStats")}
         >
           <Menu className="h-5 w-5" />
         </button>
@@ -65,16 +68,17 @@ const Header = () => {
         </Link>
         <SearchBar className="hidden flex-1 md:flex" />
         <div className="ml-auto flex items-center gap-2">
+          <LanguageToggle />
           <ThemeToggle />
           {user ? (
             <Button variant="outline" className="hidden md:flex" onClick={goToCreate}>
               <MessageSquarePlus className="mr-2 h-4 w-4" />
-              Neuer Thread
+              {t("header.newThread")}
             </Button>
           ) : (
             <Button variant="outline" className="hidden md:flex" onClick={redirectToLogin}>
               <LogIn className="mr-2 h-4 w-4" />
-              Login
+              {t("header.login")}
             </Button>
           )}
           <DropdownMenu>
@@ -85,7 +89,7 @@ const Header = () => {
                 ) : (
                   <Sparkles className="mr-2 h-4 w-4" />
                 )}
-                {user ? user.username : "Gast"}
+                {user ? user.username : t("header.user.guest")}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
@@ -99,41 +103,43 @@ const Header = () => {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem className="capitalize text-muted-foreground" disabled>
-                    Rolle: {user.role.toLowerCase()}
+                    {t("header.role", { role: user.role.toLowerCase() })}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={goToCreate}>
-                    <MessageSquarePlus className="mr-2 h-4 w-4" /> Neuer Thread
+                    <MessageSquarePlus className="mr-2 h-4 w-4" /> {t("header.newThread")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => toggleRight(true)}>
-                    <Sparkles className="mr-2 h-4 w-4" /> Trends anzeigen
+                    <Sparkles className="mr-2 h-4 w-4" /> {t("header.trends")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={toggleDensity}>
-                    <MessageSquarePlus className="mr-2 h-4 w-4" /> Ansicht: {density === "comfortable" ? "Komfort" : "Kompakt"}
+                    <MessageSquarePlus className="mr-2 h-4 w-4" />
+                    {density === "comfortable" ? t("header.view.comfortable") : t("header.view.compact")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" /> Logout
+                    <LogOut className="mr-2 h-4 w-4" /> {t("header.logout")}
                   </DropdownMenuItem>
                 </>
               ) : (
                 <>
-                  <DropdownMenuLabel>Willkommen!</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t("header.user.welcome")}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={redirectToLogin}>
-                    <LogIn className="mr-2 h-4 w-4" /> Login
+                    <LogIn className="mr-2 h-4 w-4" /> {t("header.login")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/register")}>
-                    <UserPlus className="mr-2 h-4 w-4" /> Account anlegen
+                    <UserPlus className="mr-2 h-4 w-4" /> {t("header.account.create")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => toggleRight(true)}>
-                    <Sparkles className="mr-2 h-4 w-4" /> Trends anzeigen
+                    <Sparkles className="mr-2 h-4 w-4" /> {t("header.trends")}
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={toggleDensity}>
-                    <MessageSquarePlus className="mr-2 h-4 w-4" /> Ansicht: {density === "comfortable" ? "Komfort" : "Kompakt"}
+                    <MessageSquarePlus className="mr-2 h-4 w-4" />
+                    {density === "comfortable" ? t("header.view.comfortable") : t("header.view.compact")}
                   </DropdownMenuItem>
                 </>
               )}

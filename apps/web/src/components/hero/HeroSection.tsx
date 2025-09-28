@@ -6,10 +6,12 @@ import type { Engine, ISourceOptions } from "@tsparticles/engine";
 import TypewriterTitle from "@/components/TypewriterTitle";
 import { mockApi } from "@/lib/api/mockApi";
 import type { Stats } from "@/lib/api/types";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 export default function HeroSection() {
   const [particlesReady, setParticlesReady] = useState(false);
   const [stats, setStats] = useState<Stats | null>(null);
+  const { t, locale } = useTranslation();
 
   useEffect(() => {
     initParticlesEngine(async (engine: Engine) => {
@@ -116,23 +118,18 @@ export default function HeroSection() {
                      border border-primary/40 bg-primary/10 px-3 py-1
                      text-xs font-semibold tracking-wide text-primary
                      shadow-[0_0_20px_rgba(34,211,238,0.15)] dark:shadow-[0_0_20px_rgba(34,211,238,0.15)]"
-          aria-label="NexusLabs – The Next-Gen Gaming Forum"
+          aria-label={t("landing.hero.badge")}
         >
           <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
-          NEXUSLABS – THE NEXT-GEN GAMING FORUM
+          {t("landing.hero.badge")}
         </Link>
 
         {/* === HEADLINE === */}
-        <TypewriterTitle
-          text="Verbinde dich mit der Elite der Gaming-Community"
-          className="mx-auto inline-block"
-        />
+        <TypewriterTitle text={t("landing.hero.headline")} className="mx-auto inline-block" />
 
         {/* === SUBCOPY === */}
         <p className="mx-auto mt-6 max-w-[820px] text-base sm:text-lg leading-relaxed text-muted-foreground">
-          Diskutiere Meta-Strategien, organisiere Scrims und erhalte Insights direkt
-          aus der Szene. Mit Live-Presence, animierten Statistiken und einem Dock-
-          Chat bleibst du immer verbunden.
+          {t("landing.hero.subcopy")}
         </p>
 
         {/* === CTAS === */}
@@ -142,21 +139,25 @@ export default function HeroSection() {
             className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3
                        font-semibold text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            Forum betreten →
+            {t("landing.hero.primaryCta")}
           </Link>
           <Link
             to="/register"
             className="inline-flex items-center justify-center rounded-xl border border-border px-5 py-3
                        font-semibold text-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
-            Konto erstellen
+            {t("landing.hero.secondaryCta")}
           </Link>
         </div>
 
         {/* === STATISTIKEN === */}
         {stats && (
           <p className="mt-6 text-sm uppercase tracking-wide text-muted-foreground">
-            {stats.usersTotal.toLocaleString("de-DE")} MITGLIEDER • {stats.usersOnline} ONLINE • {stats.threadsTotal} THREADS AKTIV
+            {t("landing.hero.stats", {
+              users: stats.usersTotal.toLocaleString(locale),
+              online: stats.usersOnline.toLocaleString(locale),
+              threads: stats.threadsTotal.toLocaleString(locale)
+            })}
           </p>
         )}
       </div>

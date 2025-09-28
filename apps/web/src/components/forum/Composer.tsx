@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 interface ComposerProps {
   onSubmit: (payload: { title?: string; body: string }) => Promise<void> | void;
@@ -13,6 +14,7 @@ interface ComposerProps {
 const Composer = ({ onSubmit, variant = "reply", isSubmitting }: ComposerProps) => {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const { t } = useTranslation();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -28,20 +30,26 @@ const Composer = ({ onSubmit, variant = "reply", isSubmitting }: ComposerProps) 
         <Input
           value={title}
           onChange={(event) => setTitle(event.target.value)}
-          placeholder="Thread Titel"
+          placeholder={t("composer.title.placeholder")}
           required
         />
       )}
       <Textarea
         value={body}
         onChange={(event) => setBody(event.target.value)}
-        placeholder={variant === "thread" ? "Was möchtest du diskutieren?" : "Teile deine Antwort"}
+        placeholder={
+          variant === "thread" ? t("composer.body.placeholder") : t("composer.reply.placeholder")
+        }
         rows={variant === "thread" ? 6 : 4}
         required
       />
       <div className="flex items-center justify-end gap-3">
         <Button type="submit" disabled={isSubmitting || !body.trim()}>
-          {variant === "thread" ? "Thread veröffentlichen" : "Antwort posten"}
+          {isSubmitting
+            ? t("composer.saving")
+            : variant === "thread"
+              ? t("composer.threadSubmit")
+              : t("composer.replySubmit")}
         </Button>
       </div>
     </form>

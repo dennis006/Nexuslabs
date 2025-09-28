@@ -24,12 +24,14 @@ import SidebarLeftStats from "@/components/layout/SidebarLeftStats";
 import SidebarRightTrends from "@/components/layout/SidebarRightTrends";
 import CategorySection from "@/components/forum/CategorySection";
 import ChatInline from "@/components/chat/ChatInline";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
+import type { TranslationKey } from "@/lib/i18n/translations";
 
-const CATEGORY_SORT_OPTIONS: Array<{ value: NonNullable<CategoryFilter["sort"]>; label: string }> = [
-  { value: "name", label: "Name A–Z" },
-  { value: "threads", label: "Meiste Threads" },
-  { value: "posts", label: "Meiste Posts" },
-  { value: "new", label: "Neu hinzugefügt" }
+const CATEGORY_SORT_OPTIONS: Array<{ value: NonNullable<CategoryFilter["sort"]>; labelKey: TranslationKey }> = [
+  { value: "name", labelKey: "forum.sort.name" },
+  { value: "threads", labelKey: "forum.sort.threads" },
+  { value: "posts", labelKey: "forum.sort.posts" },
+  { value: "new", labelKey: "forum.sort.new" }
 ];
 
 const Forum = () => {
@@ -112,12 +114,17 @@ const Forum = () => {
     void fetchCategories({ append: true });
   }, [fetchCategories]);
 
+  const { t, locale } = useTranslation();
+
   const activeSortLabel = useMemo(
-    () => CATEGORY_SORT_OPTIONS.find((option) => option.value === categoryFilters.sort)?.label ?? "Sortierung",
-    [categoryFilters.sort]
+    () => {
+      const match = CATEGORY_SORT_OPTIONS.find((option) => option.value === categoryFilters.sort);
+      return match ? t(match.labelKey) : t("forum.sort.label");
+    },
+    [categoryFilters.sort, t]
   );
 
-  const activeTagLabel = categoryFilters.tag ?? "Alle Genres/Tags";
+  const activeTagLabel = categoryFilters.tag ?? t("forum.tag.all");
   const remainingCategories = Math.max(totalCategories - categories.length, 0);
   const isInitialCategoryLoading = loadingCategories && categories.length === 0;
   const categoryError = error && categories.length === 0;
@@ -152,9 +159,9 @@ const Forum = () => {
                     data-density={density}
                   >
                     <div className="space-y-2">
-                      <h1 className="text-3xl font-semibold tracking-tight">Forum Übersicht</h1>
+                      <h1 className="text-3xl font-semibold tracking-tight">{t("forum.overview.title")}</h1>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        Was passiert gerade in der NexusLabs Community?
+                        {t("forum.overview.subtitle")}
                       </p>
                     </div>
                   </div>
@@ -170,11 +177,13 @@ const Forum = () => {
                 <header className="sticky top-20 z-20 rounded-3xl border border-border/60 bg-background/70 p-4 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/75 sm:p-5 md:p-6 2xl:p-7">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex w-full flex-col gap-2 sm:max-w-md">
-                      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Kategorien</span>
+                      <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t("forum.categories.label")}
+                      </span>
                       <SearchBar
                         value={searchTerm}
                         onChange={(event) => setSearchTerm(event.target.value)}
-                        placeholder="Suche Kategorien/Subkategorien…"
+                        placeholder={t("forum.categories.search")}
                         className="w-full"
                         inputClassName="h-10 rounded-xl"
                       />
@@ -195,7 +204,7 @@ const Forum = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="min-w-[12rem]">
-                          <DropdownMenuLabel>Sortieren nach</DropdownMenuLabel>
+                          <DropdownMenuLabel>{t("forum.sort.label")}</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           {CATEGORY_SORT_OPTIONS.map((option) => (
                             <DropdownMenuItem
@@ -206,7 +215,7 @@ const Forum = () => {
                                 categoryFilters.sort === option.value ? "text-primary" : undefined
                               )}
                             >
-                              {option.label}
+                              {t(option.labelKey)}
                               {categoryFilters.sort === option.value ? (
                                 <Check className="h-4 w-4" aria-hidden="true" />
                               ) : null}
@@ -227,7 +236,7 @@ const Forum = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="min-w-[12rem]">
-                          <DropdownMenuLabel>Genre / Tag</DropdownMenuLabel>
+                          <DropdownMenuLabel>{t("forum.tag.label")}</DropdownMenuLabel>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onSelect={() => handleTagSelect(undefined)}
@@ -236,7 +245,7 @@ const Forum = () => {
                               !categoryFilters.tag ? "text-primary" : undefined
                             )}
                           >
-                            Alle Genres/Tags
+                            {t("forum.tag.all")}
                             {!categoryFilters.tag ? <Check className="h-4 w-4" aria-hidden="true" /> : null}
                           </DropdownMenuItem>
                           {categoryTags.map((tag) => (
@@ -269,7 +278,7 @@ const Forum = () => {
                         )}
                       >
                         <Sparkles className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
-                        Nur mit neuen Beiträgen
+                        {t("forum.tag.onlyNew")}
                       </Button>
                     </div>
                   </div>
@@ -280,12 +289,12 @@ const Forum = () => {
                     <LoadingSkeleton />
                   ) : categoryError ? (
                     <ErrorState
-                      message={error ?? "Es ist ein Fehler aufgetreten."}
+                      message={error ?? t("forum.error.generic")}
                       onRetry={() => fetchCategories()}
                     />
                   ) : isCategoryEmpty ? (
                     <div className="rounded-2xl border border-dashed border-border/60 bg-muted/10 p-10 text-center text-sm text-muted-foreground">
-                      Keine Kategorien gefunden. Versuche es mit anderen Filtern.
+                      {t("forum.empty.categories")}
                     </div>
                   ) : (
                     <>
@@ -303,12 +312,14 @@ const Forum = () => {
                             {loadingMoreCategories ? (
                               <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                                Lädt weitere Kategorien…
+                                {t("forum.categories.loading")}
                               </>
                             ) : remainingCategories > 0 ? (
-                              `Mehr laden (${remainingCategories})`
+                              t("forum.loadMore.remaining", {
+                                count: remainingCategories.toLocaleString(locale)
+                              })
                             ) : (
-                              "Mehr laden"
+                              t("forum.loadMore")
                             )}
                           </Button>
                         </div>
