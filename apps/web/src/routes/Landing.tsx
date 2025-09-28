@@ -103,7 +103,7 @@ const Landing = () => {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="space-y-6"
           >
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs uppercase tracking-wide text-primary">
+            <span className="mx-auto inline-flex items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs uppercase tracking-wide text-primary">
               NexusLabs – The Next-Gen Gaming Forum
             </span>
             <TypewriterTitle
@@ -135,7 +135,7 @@ const Landing = () => {
         {features.map((feature, index) => (
           <motion.div
             key={feature.title}
-            className="rounded-3xl border border-border/60 bg-card/70 p-6 backdrop-blur supports-[backdrop-filter]:bg-card/60"
+            className="rounded-3xl border border-border/60 bg-card/70 p-6 text-center backdrop-blur supports-[backdrop-filter]:bg-card/60"
             data-animate-card
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
