@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 
-
 type OrbConfig = {
   top: string;
   left: string;
@@ -19,6 +18,12 @@ type CometConfig = {
 
 type GlyphConfig = {
   symbol: string;
+  top: string;
+  left: string;
+  delay: number;
+};
+
+type ConstellationConfig = {
   top: string;
   left: string;
   delay: number;
@@ -58,7 +63,6 @@ const comets: CometConfig[] = [
   { top: "62%", delay: 4.5, duration: 16, direction: "left" },
   { top: "78%", delay: 2.5, duration: 18, direction: "right" },
 ];
-
 
 const gradientOrbs = [
   {
@@ -138,9 +142,7 @@ const cometTrails = [
 
 const latticeColumns = ["left-[12%]", "left-[50%]", "left-[82%]"];
 
-
-
-const constellations = [
+const constellations: ConstellationConfig[] = [
   { top: "18%", left: "16%", delay: 0 },
   { top: "72%", left: "22%", delay: 1.8 },
   { top: "28%", left: "74%", delay: 2.6 },
@@ -149,9 +151,16 @@ const constellations = [
   { top: "82%", left: "54%", delay: 4.1 },
 ];
 
+const glyphs: GlyphConfig[] = [
+  { symbol: "✶", top: "16%", left: "18%", delay: 0.6 },
+  { symbol: "☉", top: "42%", left: "72%", delay: 1.4 },
+  { symbol: "✧", top: "68%", left: "48%", delay: 0.9 },
+  { symbol: "☾", top: "32%", left: "38%", delay: 1.8 },
+  { symbol: "⚚", top: "58%", left: "14%", delay: 2.4 },
+];
+
 const RegisterBackground = () => (
   <div className="pointer-events-none absolute inset-0 overflow-hidden">
-
     {gradientOrbs.map((orb, index) => (
       <motion.div
         key={`orb-${index}`}
@@ -225,7 +234,7 @@ const RegisterBackground = () => (
 
     {cometTrails.map((comet, index) => (
       <motion.span
-        key={`comet-${index}`}
+        key={`trail-${index}`}
         className="absolute h-1.5 w-1.5 rounded-full bg-sky-200/90 shadow-[0_0_25px_rgba(125,211,252,0.7)]"
         style={{ top: comet.top, left: comet.left }}
         animate={{ opacity: [0, 1, 0], scale: [0.8, 1.6, 0.8] }}
@@ -249,26 +258,9 @@ const RegisterBackground = () => (
       transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
     />
 
-
-const glyphs: GlyphConfig[] = [
-  { symbol: "✶", top: "16%", left: "18%", delay: 0.6 },
-  { symbol: "☉", top: "42%", left: "72%", delay: 1.4 },
-  { symbol: "✧", top: "68%", left: "48%", delay: 0.9 },
-  { symbol: "☾", top: "32%", left: "38%", delay: 1.8 },
-  { symbol: "⚚", top: "58%", left: "14%", delay: 2.4 },
-];
-
-const RegisterBackground = () => (
-  <div className="pointer-events-none absolute inset-0 overflow-hidden">
-    <motion.span
-      className="absolute inset-x-0 top-1/2 h-[42rem] -translate-y-1/2 rounded-[999px] bg-[radial-gradient(circle_at_center,_rgba(15,118,110,0.12),_rgba(12,17,33,0))] blur-[140px]"
-      animate={{ rotate: [0, 15, -8, 0] }}
-      transition={{ duration: 42, repeat: Infinity, ease: "easeInOut" }}
-    />
-
     {orbs.map((orb, index) => (
       <motion.span
-        key={`orb-${index}`}
+        key={`glow-orb-${index}`}
         className={`absolute ${orb.gradient} blur-3xl`}
         style={{
           top: orb.top,
@@ -314,12 +306,7 @@ const RegisterBackground = () => (
       />
     ))}
 
-
     {glyphs.map((glyph, index) => (
-
-
-    {constellations.map((constellation, index) => (
-
       <motion.span
         key={`glyph-${glyph.symbol}-${index}`}
         className="absolute text-4xl font-light text-cyan-100/40 mix-blend-screen"
@@ -335,13 +322,25 @@ const RegisterBackground = () => (
       </motion.span>
     ))}
 
+    {constellations.map((constellation, index) => (
+      <motion.div
+        key={`constellation-${index}`}
+        className="absolute h-16 w-16"
+        style={{ top: constellation.top, left: constellation.left }}
+        animate={{ opacity: [0.2, 0.7, 0.2], rotate: [0, 8, -8, 0] }}
+        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: constellation.delay }}
+      >
+        <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-100/80 shadow-[0_0_12px_rgba(165,243,252,0.7)]" />
+        <span className="absolute left-[35%] top-[25%] h-1 w-1 rounded-full bg-sky-200/70" />
+        <span className="absolute left-[65%] top-[65%] h-1 w-1 rounded-full bg-sky-200/50" />
+      </motion.div>
+    ))}
 
     <motion.span
       className="absolute right-[-18%] top-[-22%] h-[38rem] w-[38rem] rounded-full bg-[conic-gradient(from_120deg_at_50%_50%,_rgba(56,189,248,0.4),_rgba(244,114,182,0.4),_rgba(34,197,94,0.35),_rgba(56,189,248,0.4))] opacity-70 blur-[130px]"
       animate={{ rotate: [0, 360] }}
       transition={{ duration: 68, repeat: Infinity, ease: "linear" }}
     />
-
 
     <motion.div
       className="absolute inset-0"
@@ -352,9 +351,6 @@ const RegisterBackground = () => (
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_12%,_rgba(14,165,233,0.12),_transparent_45%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_88%_78%,_rgba(236,72,153,0.14),_transparent_50%)]" />
     </motion.div>
-
-
-
   </div>
 );
 
