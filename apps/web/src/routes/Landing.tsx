@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
 import { Button } from "@/components/ui/button";
-import HandwritingText from "@/components/HandwritingText";
 import { Sparkles, ArrowRight, Shield } from "lucide-react";
 import { useGsapScrollReveal } from "@/lib/animations/gsapScroll";
 import { mockApi } from "@/lib/api/mockApi";
@@ -106,10 +105,8 @@ const Landing = () => {
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs uppercase tracking-wide text-primary">
               NexusLabs – The Next-Gen Gaming Forum
             </span>
-            <h1 className="mb-6 text-balance">
-              <HandwritingText className="block">
-                Verbinde dich mit der Elite der Gaming-Community
-              </HandwritingText>
+            <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
+              Verbinde dich mit der Elite der Gaming-Community
             </h1>
             <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
               Diskutiere Meta-Strategien, organisiere Scrims und erhalte Insights direkt aus der Szene. Mit Live-Presence, animierten Statistiken und einem Dock-Chat bleibst du immer verbunden.
