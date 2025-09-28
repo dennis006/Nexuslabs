@@ -662,7 +662,8 @@ const renderMetadataItem = (
               </div>
               <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
-                  <AtSign className="h-4 w-4" />@{profile.handle}
+                  <AtSign className="h-4 w-4" />
+                  {profile.handle}
                 </span>
                 {profile.contact.pronouns ? (
                   <span className="flex items-center gap-1">
