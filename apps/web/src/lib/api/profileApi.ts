@@ -254,6 +254,9 @@ export type UpdateProfilePayload = {
   };
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
 const jsonOrError = async <T>(res: Response) => {
   let data: unknown;
   try {
@@ -264,9 +267,8 @@ const jsonOrError = async <T>(res: Response) => {
 
   if (!res.ok) {
     const message =
-      (data && typeof data === "object" && "message" in data && typeof (data as any).message === "string"
-        ? (data as any).message
-        : undefined) ?? `HTTP ${res.status}`;
+      (isRecord(data) && typeof data.message === "string" ? data.message : undefined) ??
+      `HTTP ${res.status}`;
     throw new Error(message);
   }
 

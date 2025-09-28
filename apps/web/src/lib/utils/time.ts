@@ -50,8 +50,21 @@ export const formatRelativeTime = (dateIso: string, language: Language = "de") =
   return `${years} ${labels.year}`;
 };
 
-export const formatDateTime = (dateIso: string, locale: string = "de-DE") =>
-  new Date(dateIso).toLocaleString(locale, {
+export const formatDateTime = (dateIso: string, locale: string = "de-DE") => {
+  const date = new Date(dateIso);
+  if (Number.isNaN(date.getTime())) {
+    return dateIso;
+  }
+  return date.toLocaleString(locale, {
     dateStyle: "medium",
     timeStyle: "short"
   });
+};
+
+export const formatDate = (dateIso: string, locale: string = "de-DE") => {
+  const date = new Date(dateIso);
+  if (Number.isNaN(date.getTime())) {
+    return dateIso;
+  }
+  return date.toLocaleDateString(locale, { dateStyle: "long" });
+};

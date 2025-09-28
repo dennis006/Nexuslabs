@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   followProfile,
@@ -16,9 +16,10 @@ import {
   type UserProfileResponse,
 } from "@/lib/api/profileApi";
 import { useUserStore } from "@/store/userStore";
+import { useUiStore } from "@/store/uiStore";
 import { useTranslation } from "@/lib/i18n/TranslationProvider";
 import type { TranslationKey } from "@/lib/i18n/translations";
-import { formatDateTime, formatRelativeTime } from "@/lib/utils/time";
+import { formatDate, formatDateTime, formatRelativeTime } from "@/lib/utils/time";
 import { cn } from "@/lib/utils/cn";
 import {
   AtSign,
@@ -92,6 +93,27 @@ const DEFAULT_FORM: FormState = {
 const createEmptySocial = (): ProfileSocial => ({ id: nanoid(), url: "" });
 const createEmptyLink = (): ProfileLink => ({ label: "", url: "" });
 
+type PrivacyFieldKey = keyof NonNullable<FormState["privacy"]>;
+const PRIVACY_FIELDS: Array<{ key: PrivacyFieldKey; label: TranslationKey }> = [
+  { key: "showEmail", label: "profile.settings.privacy.showEmail" },
+  { key: "showLastOnline", label: "profile.settings.privacy.showLastOnline" },
+  { key: "showBirthday", label: "profile.settings.privacy.showBirthday" },
+  { key: "showLocation", label: "profile.settings.privacy.showLocation" },
+  { key: "showPronouns", label: "profile.settings.privacy.showPronouns" },
+  { key: "allowMessages", label: "profile.settings.privacy.allowMessages" },
+  { key: "allowTagging", label: "profile.settings.privacy.allowTagging" },
+];
+
+type NotificationFieldKey = keyof NonNullable<FormState["notifications"]>;
+const NOTIFICATION_FIELDS: Array<{ key: NotificationFieldKey; label: TranslationKey }> = [
+  { key: "emailMentions", label: "profile.settings.notifications.emailMentions" },
+  { key: "emailFollows", label: "profile.settings.notifications.emailFollows" },
+  { key: "emailDigest", label: "profile.settings.notifications.emailDigest" },
+  { key: "pushMentions", label: "profile.settings.notifications.pushMentions" },
+  { key: "pushReplies", label: "profile.settings.notifications.pushReplies" },
+  { key: "pushFollows", label: "profile.settings.notifications.pushFollows" },
+];
+
 const Profile = () => {
   const { handle = "" } = useParams<{ handle: string }>();
   const navigate = useNavigate();
@@ -107,6 +129,7 @@ const Profile = () => {
   const [followLoading, setFollowLoading] = useState(false);
 
   const sanitizedHandle = useMemo(() => handle.replace(/^@/, ""), [handle]);
+  const maxBirthday = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   const canEdit = Boolean(data?.viewer.canEdit);
 
@@ -189,6 +212,8 @@ const Profile = () => {
   }, [loadProfile]);
 
   const profile = data?.profile;
+  const appearanceTheme = data?.settings?.appearance?.theme ?? null;
+  const appearanceDensity = data?.settings?.appearance?.density ?? null;
 
   useEffect(() => {
     if (profile && data?.settings) {
@@ -197,6 +222,33 @@ const Profile = () => {
   }, [profile, data?.settings, applyProfileToForm]);
 
   const isOwnProfile = Boolean(viewer && profile && viewer.username.toLowerCase() === profile.handle.toLowerCase());
+
+  useEffect(() => {
+    if (!isOwnProfile) {
+      return;
+    }
+    if (!appearanceTheme && !appearanceDensity) {
+      return;
+    }
+    const uiState = useUiStore.getState();
+    if (appearanceTheme) {
+      const normalizedTheme =
+        appearanceTheme === "SYSTEM"
+          ? "system"
+          : appearanceTheme === "DARK"
+            ? "dark"
+            : "light";
+      if (uiState.theme !== normalizedTheme) {
+        uiState.setTheme(normalizedTheme);
+      }
+    }
+    if (appearanceDensity) {
+      const normalizedDensity = appearanceDensity === "COMPACT" ? "compact" : "comfortable";
+      if (uiState.density !== normalizedDensity) {
+        uiState.setDensity(normalizedDensity);
+      }
+    }
+  }, [appearanceTheme, appearanceDensity, isOwnProfile]);
 
   const followerCount = profile?.counts.followers ?? 0;
   const followingCount = profile?.counts.following ?? 0;
@@ -273,6 +325,38 @@ const Profile = () => {
       const links = [...(prev.links ?? [])];
       links.splice(index, 1);
       return { ...prev, links };
+    });
+  };
+
+  const handlePrivacyToggle = (key: PrivacyFieldKey, value: boolean) => {
+    setForm((prev) => {
+      const nextPrivacy = { ...(prev.privacy ?? {}) } as NonNullable<FormState["privacy"]>;
+      nextPrivacy[key] = value;
+      return { ...prev, privacy: nextPrivacy };
+    });
+  };
+
+  const handleNotificationToggle = (key: NotificationFieldKey, value: boolean) => {
+    setForm((prev) => {
+      const nextNotifications = { ...(prev.notifications ?? {}) } as NonNullable<FormState["notifications"]>;
+      nextNotifications[key] = value;
+      return { ...prev, notifications: nextNotifications };
+    });
+  };
+
+  type AppearanceFieldKey = keyof NonNullable<FormState["appearance"]>;
+  const handleAppearanceChange = <K extends AppearanceFieldKey>(
+    key: K,
+    value: NonNullable<FormState["appearance"]>[K]
+  ) => {
+    setForm((prev) => {
+      if (!prev.appearance) {
+        return prev;
+      }
+      return {
+        ...prev,
+        appearance: { ...prev.appearance, [key]: value },
+      };
     });
   };
 
@@ -368,7 +452,7 @@ const Profile = () => {
     }
   };
 
-  const renderStat = (value: number, label: string, icon: JSX.Element) => (
+  const renderStat = (value: number, label: string, icon: ReactNode) => (
     <Card className="flex-1 min-w-[140px]">
       <CardHeader className="pb-2 flex-row items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -383,7 +467,7 @@ const Profile = () => {
   );
 
 const renderMetadataItem = (
-  icon: JSX.Element,
+  icon: ReactNode,
   label: string,
   value: string | null,
   fallbackKey: TranslationKey
@@ -664,7 +748,7 @@ const renderMetadataItem = (
                   {renderMetadataItem(
                     <CalendarDays className="h-5 w-5" />,
                     t("profile.metadata.birthday"),
-                    profile.metadata.birthday ? formatDateTime(profile.metadata.birthday, locale) : null,
+                    profile.metadata.birthday ? formatDate(profile.metadata.birthday, locale) : null,
                     "profile.metadata.private"
                   )}
                 </CardContent>
@@ -943,6 +1027,21 @@ const renderMetadataItem = (
                         maxLength={8}
                       />
                     </div>
+                    <div className="flex flex-col gap-2">
+                      <label className="text-sm font-medium">{t("profile.form.birthday")}</label>
+                      <Input
+                        type="date"
+                        value={form.birthday ? form.birthday.slice(0, 10) : ""}
+                        max={maxBirthday}
+                        onChange={(event) => {
+                          const { value } = event.target;
+                          handleFormChange(
+                            "birthday",
+                            value ? new Date(`${value}T00:00:00Z`).toISOString() : null
+                          );
+                        }}
+                      />
+                    </div>
                   </div>
                   <div className="flex flex-col gap-2">
                     <label className="text-sm font-medium">{t("profile.form.bio")}</label>
@@ -1131,27 +1230,14 @@ const renderMetadataItem = (
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {form.privacy ? (
-                      [
-                        { key: "showEmail", label: t("profile.settings.privacy.showEmail") },
-                        { key: "showLastOnline", label: t("profile.settings.privacy.showLastOnline") },
-                        { key: "showBirthday", label: t("profile.settings.privacy.showBirthday") },
-                        { key: "showLocation", label: t("profile.settings.privacy.showLocation") },
-                        { key: "showPronouns", label: t("profile.settings.privacy.showPronouns") },
-                        { key: "allowMessages", label: t("profile.settings.privacy.allowMessages") },
-                        { key: "allowTagging", label: t("profile.settings.privacy.allowTagging") },
-                      ].map(({ key, label }) => (
+                      PRIVACY_FIELDS.map(({ key, label }) => (
                         <label key={key} className="flex items-center justify-between gap-4 text-sm">
-                          <span>{label}</span>
+                          <span>{t(label)}</span>
                           <input
                             type="checkbox"
                             className="h-4 w-4"
-                            checked={Boolean((form.privacy as any)?.[key])}
-                            onChange={(event) =>
-                              setForm((prev) => ({
-                                ...prev,
-                                privacy: { ...prev.privacy, [key]: event.target.checked },
-                              }))
-                            }
+                            checked={Boolean(form.privacy?.[key])}
+                            onChange={(event) => handlePrivacyToggle(key, event.target.checked)}
                           />
                         </label>
                       ))
@@ -1167,26 +1253,14 @@ const renderMetadataItem = (
                   </CardHeader>
                   <CardContent className="space-y-3">
                     {form.notifications ? (
-                      [
-                        { key: "emailMentions", label: t("profile.settings.notifications.emailMentions") },
-                        { key: "emailFollows", label: t("profile.settings.notifications.emailFollows") },
-                        { key: "emailDigest", label: t("profile.settings.notifications.emailDigest") },
-                        { key: "pushMentions", label: t("profile.settings.notifications.pushMentions") },
-                        { key: "pushReplies", label: t("profile.settings.notifications.pushReplies") },
-                        { key: "pushFollows", label: t("profile.settings.notifications.pushFollows") },
-                      ].map(({ key, label }) => (
+                      NOTIFICATION_FIELDS.map(({ key, label }) => (
                         <label key={key} className="flex items-center justify-between gap-4 text-sm">
-                          <span>{label}</span>
+                          <span>{t(label)}</span>
                           <input
                             type="checkbox"
                             className="h-4 w-4"
-                            checked={Boolean((form.notifications as any)?.[key])}
-                            onChange={(event) =>
-                              setForm((prev) => ({
-                                ...prev,
-                                notifications: { ...prev.notifications, [key]: event.target.checked },
-                              }))
-                            }
+                            checked={Boolean(form.notifications?.[key])}
+                            onChange={(event) => handleNotificationToggle(key, event.target.checked)}
                           />
                         </label>
                       ))
@@ -1209,10 +1283,14 @@ const renderMetadataItem = (
                             className="rounded-lg border border-border/60 bg-background px-3 py-2 text-sm"
                             value={form.appearance.theme ?? "SYSTEM"}
                             onChange={(event) =>
-                              setForm((prev) => ({
-                                ...prev,
-                                appearance: { ...prev.appearance, theme: event.target.value as any },
-                              }))
+                              handleAppearanceChange(
+                                "theme",
+                                event.target.value === "LIGHT"
+                                  ? "LIGHT"
+                                  : event.target.value === "DARK"
+                                    ? "DARK"
+                                    : "SYSTEM"
+                              )
                             }
                           >
                             <option value="LIGHT">{t("profile.settings.appearance.themeLight")}</option>
@@ -1226,10 +1304,10 @@ const renderMetadataItem = (
                             className="rounded-lg border border-border/60 bg-background px-3 py-2 text-sm"
                             value={form.appearance.density ?? "COMFORTABLE"}
                             onChange={(event) =>
-                              setForm((prev) => ({
-                                ...prev,
-                                appearance: { ...prev.appearance, density: event.target.value as any },
-                              }))
+                              handleAppearanceChange(
+                                "density",
+                                event.target.value === "COMPACT" ? "COMPACT" : "COMFORTABLE"
+                              )
                             }
                           >
                             <option value="COMFORTABLE">{t("profile.settings.appearance.densityComfort")}</option>
@@ -1241,12 +1319,7 @@ const renderMetadataItem = (
                             <label className="text-sm font-medium">{t("profile.settings.appearance.language")}</label>
                             <Input
                               value={form.appearance.language ?? ""}
-                              onChange={(event) =>
-                                setForm((prev) => ({
-                                  ...prev,
-                                  appearance: { ...prev.appearance, language: event.target.value },
-                                }))
-                              }
+                              onChange={(event) => handleAppearanceChange("language", event.target.value)}
                             />
                           </div>
                           <div className="flex flex-col gap-2">
@@ -1255,10 +1328,10 @@ const renderMetadataItem = (
                               className="rounded-lg border border-border/60 bg-background px-3 py-2 text-sm"
                               value={form.appearance.timeFormat ?? "H24"}
                               onChange={(event) =>
-                                setForm((prev) => ({
-                                  ...prev,
-                                  appearance: { ...prev.appearance, timeFormat: event.target.value as any },
-                                }))
+                                handleAppearanceChange(
+                                  "timeFormat",
+                                  event.target.value === "H12" ? "H12" : "H24"
+                                )
                               }
                             >
                               <option value="H24">24h</option>
