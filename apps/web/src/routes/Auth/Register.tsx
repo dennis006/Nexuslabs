@@ -1,5 +1,5 @@
 import type { FormEvent } from "react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,6 +11,137 @@ import { Button } from "@/components/ui/button";
 import { register } from "@/lib/api/authApi";
 import { useUserStore } from "@/store/userStore";
 import { USERNAME_PATTERN, USERNAME_TITLE } from "@/features/auth/validation";
+
+// Kawaii Icons for Password Strength
+const KawaiiIcons = {
+  sleeping: (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+      <circle cx="12" cy="12" r="10" className="opacity-20"/>
+      <circle cx="9" cy="9" r="1.5" className="opacity-60"/>
+      <path d="M15 9c0 1.5-1 2.5-2.5 2.5s-2.5-1-2.5-2.5" className="opacity-40"/>
+      <path d="M8 15h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="opacity-60"/>
+    </svg>
+  ),
+  weak: (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+      <circle cx="12" cy="12" r="10" className="text-red-300"/>
+      <circle cx="9" cy="9" r="1.5" className="text-red-600"/>
+      <path d="M15 9c0 1.5-1 2.5-2.5 2.5s-2.5-1-2.5-2.5" className="text-red-600" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      <path d="M8 15h8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-red-600"/>
+    </svg>
+  ),
+  okay: (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+      <circle cx="12" cy="12" r="10" className="text-yellow-300"/>
+      <circle cx="9" cy="9" r="1.5" className="text-yellow-600"/>
+      <circle cx="15" cy="9" r="1.5" className="text-yellow-600"/>
+      <path d="M8 15c0-1 1-2 2-2h4c1 0 2 1 2 2" className="text-yellow-600" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+    </svg>
+  ),
+  good: (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+      <circle cx="12" cy="12" r="10" className="text-blue-300"/>
+      <circle cx="9" cy="9" r="1.5" className="text-blue-600"/>
+      <circle cx="15" cy="9" r="1.5" className="text-blue-600"/>
+      <path d="M8 14c0-1 1-2 2-2h4c1 0 2 1 2 2" className="text-blue-600" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      <circle cx="12" cy="17" r="1" className="text-blue-600"/>
+    </svg>
+  ),
+  strong: (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+      <circle cx="12" cy="12" r="10" className="text-green-300"/>
+      <circle cx="9" cy="9" r="1.5" className="text-green-600"/>
+      <circle cx="15" cy="9" r="1.5" className="text-green-600"/>
+      <path d="M8 14c0-1 1-2 2-2h4c1 0 2 1 2 2" className="text-green-600" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      <circle cx="12" cy="17" r="1" className="text-green-600"/>
+      <path d="M12 6v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-green-600"/>
+    </svg>
+  ),
+  perfect: (
+    <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+      <circle cx="12" cy="12" r="10" className="text-purple-300"/>
+      <circle cx="9" cy="9" r="1.5" className="text-purple-600"/>
+      <circle cx="15" cy="9" r="1.5" className="text-purple-600"/>
+      <path d="M8 14c0-1 1-2 2-2h4c1 0 2 1 2 2" className="text-purple-600" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+      <circle cx="12" cy="17" r="1" className="text-purple-600"/>
+      <path d="M12 6v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-purple-600"/>
+      <path d="M6 12h2M16 12h2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="text-purple-600"/>
+      <circle cx="12" cy="3" r="0.5" className="text-purple-600"/>
+      <path d="M12 1v1M10.5 2.5l0.5 0.5M13.5 2.5l-0.5 0.5" stroke="currentColor" strokeWidth="1" strokeLinecap="round" className="text-purple-600"/>
+    </svg>
+  )
+};
+
+// Password Strength Indicator Component
+const PasswordStrengthIndicator = ({ password }: { password: string }) => {
+  const strength = useMemo(() => {
+    if (!password) return { level: 0, text: "", icon: KawaiiIcons.sleeping, color: "text-muted-foreground" };
+    
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
+    
+    if (score <= 1) return { level: 1, text: "Schwach", icon: KawaiiIcons.weak, color: "text-red-500" };
+    if (score <= 2) return { level: 2, text: "Okay", icon: KawaiiIcons.okay, color: "text-yellow-500" };
+    if (score <= 3) return { level: 3, text: "Gut", icon: KawaiiIcons.good, color: "text-blue-500" };
+    if (score <= 4) return { level: 4, text: "Stark", icon: KawaiiIcons.strong, color: "text-green-500" };
+    return { level: 5, text: "Perfekt!", icon: KawaiiIcons.perfect, color: "text-purple-500" };
+  }, [password]);
+
+  return (
+    <motion.div
+      className="mt-2 space-y-2"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="flex items-center gap-2">
+        <motion.div
+          animate={{ 
+            scale: strength.level > 0 ? [1, 1.2, 1] : 1,
+            rotate: strength.level > 3 ? [0, 5, -5, 0] : 0
+          }}
+          transition={{ duration: 0.5 }}
+        >
+          {strength.icon}
+        </motion.div>
+        <span className={`text-xs font-medium ${strength.color}`}>
+          {strength.text}
+        </span>
+      </div>
+      
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((level) => (
+          <motion.div
+            key={level}
+            className={`h-2 flex-1 rounded-full ${
+              level <= strength.level 
+                ? strength.level === 1 ? 'bg-red-400' :
+                  strength.level === 2 ? 'bg-yellow-400' :
+                  strength.level === 3 ? 'bg-blue-400' :
+                  strength.level === 4 ? 'bg-green-400' :
+                  'bg-purple-400'
+                : 'bg-muted'
+            }`}
+            initial={{ scaleX: 0 }}
+            animate={{ 
+              scaleX: level <= strength.level ? 1 : 0.3,
+              scaleY: level <= strength.level ? [1, 1.2, 1] : 1
+            }}
+            transition={{ 
+              duration: 0.3, 
+              delay: level * 0.1,
+              scaleY: { duration: 0.5, repeat: level === strength.level ? Infinity : 0, repeatDelay: 1 }
+            }}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+};
 
 const Register = () => {
   const navigate = useNavigate();
@@ -163,7 +294,7 @@ const Register = () => {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••"
+                  placeholder={showPassword ? "Gib dein Passwort ein..." : "••••••"}
                   value={form.password}
                   onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
                   minLength={8}
@@ -171,39 +302,61 @@ const Register = () => {
                   disabled={loading}
                   className="pr-10 transition-all duration-300 focus:shadow-[0_0_20px_rgba(56,189,248,0.3)] dark:focus:shadow-[0_0_20px_rgba(56,189,248,0.3)]"
                 />
-                <motion.button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  onClick={() => setShowPassword(!showPassword)}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                  disabled={loading}
-                >
+                
+                {/* Kawaii Password Toggle Button */}
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 -translate-y-2 w-5 h-5 flex items-center justify-center">
                   <AnimatePresence mode="wait">
                     {showPassword ? (
-                      <motion.div
-                        key="eye-off"
-                        initial={{ opacity: 0, rotate: -90 }}
-                        animate={{ opacity: 1, rotate: 0 }}
-                        exit={{ opacity: 0, rotate: 90 }}
-                        transition={{ duration: 0.2 }}
+                      <motion.button
+                        key="kawaii-eye-off"
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground transition-colors duration-200 w-5 h-5 flex items-center justify-center"
+                        onClick={() => setShowPassword(!showPassword)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        disabled={loading}
+                        initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
+                        animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                        exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
                       >
-                        <EyeOff className="h-4 w-4" />
-                      </motion.div>
+                        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                          <circle cx="12" cy="12" r="10" className="text-orange-400"/>
+                          <circle cx="9" cy="9" r="1.2" className="text-orange-700"/>
+                          <circle cx="15" cy="9" r="1.2" className="text-orange-700"/>
+                          <path d="M8 14c0-1 1-2 2-2h4c1 0 2 1 2 2" className="text-orange-700" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                          <path d="M7 7l10 10M17 7l-10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-red-600"/>
+                        </svg>
+                      </motion.button>
                     ) : (
-                      <motion.div
-                        key="eye"
-                        initial={{ opacity: 0, rotate: -90 }}
-                        animate={{ opacity: 1, rotate: 0 }}
-                        exit={{ opacity: 0, rotate: 90 }}
-                        transition={{ duration: 0.2 }}
+                      <motion.button
+                        key="kawaii-eye"
+                        type="button"
+                        className="text-muted-foreground hover:text-foreground transition-colors duration-200 w-5 h-5 flex items-center justify-center"
+                        onClick={() => setShowPassword(!showPassword)}
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        disabled={loading}
+                        initial={{ opacity: 0, rotate: -90, scale: 0.8 }}
+                        animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                        exit={{ opacity: 0, rotate: 90, scale: 0.8 }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
                       >
-                        <Eye className="h-4 w-4" />
-                      </motion.div>
+                        <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                          <circle cx="12" cy="12" r="10" className="text-blue-400"/>
+                          <circle cx="9" cy="9" r="1.2" className="text-blue-700"/>
+                          <circle cx="15" cy="9" r="1.2" className="text-blue-700"/>
+                          <path d="M8 14c0-1 1-2 2-2h4c1 0 2 1 2 2" className="text-blue-700" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+                          <circle cx="12" cy="17" r="0.8" className="text-blue-700"/>
+                        </svg>
+                      </motion.button>
                     )}
                   </AnimatePresence>
-                </motion.button>
+                </div>
               </motion.div>
+              
+              {/* Password Strength Indicator */}
+              <PasswordStrengthIndicator password={form.password} />
             </motion.div>
 
             <motion.div
