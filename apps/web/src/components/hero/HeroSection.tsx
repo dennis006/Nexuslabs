@@ -8,15 +8,15 @@ export default function HeroSection() {
         {/* <Particles /> */}
       </div>
 
-      <div className="relative z-10 mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24 text-center">
-        <div className="mx-auto mb-5 flex w-max items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold tracking-wide text-cyan-200 shadow-[0_0_20px_rgba(34,211,238,0.15)]">
+      <div className="relative z-10 mx-auto flex max-w-[1200px] flex-col items-center px-4 py-16 text-center sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+        <div className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-semibold tracking-wide text-cyan-200 shadow-[0_0_20px_rgba(34,211,238,0.15)]">
           <span className="h-1.5 w-1.5 rounded-full bg-cyan-300" aria-hidden />
           <span>NexusLabs – The Next-Gen Gaming Forum</span>
         </div>
 
         <TypewriterTitle
           text="Verbinde dich mit der Elite der Gaming-Community"
-          className="mx-auto inline-block"
+          className="mx-auto inline-block text-center"
         />
 
         <p className="mx-auto mt-6 max-w-[820px] text-base sm:text-lg leading-relaxed text-slate-200/90">
