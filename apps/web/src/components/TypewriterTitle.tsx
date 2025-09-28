@@ -9,6 +9,8 @@ type Props = {
   minSpeed?: number;
   maxSpeed?: number;
   underline?: boolean;
+  loop?: boolean;
+  loopDelay?: number;
 };
 
 export default function TypewriterTitle({
@@ -17,13 +19,16 @@ export default function TypewriterTitle({
   startDelay = 250,
   minSpeed = 18,
   maxSpeed = 45,
-  underline = true
+  underline = true,
+  loop = true,
+  loopDelay = 1800
 }: Props) {
   const reduce = useReducedMotion();
   const [typed, setTyped] = useState<Array<{ char: string; id: number }>>(() =>
     reduce ? text.split("").map((char, index) => ({ char, id: index })) : []
   );
   const iRef = useRef(0);
+  const [iteration, setIteration] = useState(0);
   const done = iRef.current >= text.length;
 
   const extraPause = useMemo(() => new Set([",", ".", "!", "?", ":", ";"]), []);
@@ -66,7 +71,20 @@ export default function TypewriterTitle({
       cancelled = true;
       if (t) clearTimeout(t);
     };
-  }, [text, minSpeed, maxSpeed, startDelay, extraPause, spaces, reduce]);
+  }, [text, minSpeed, maxSpeed, startDelay, extraPause, spaces, reduce, iteration]);
+
+  useEffect(() => {
+    if (reduce || !loop) return;
+    if (!done) return;
+
+    const timeout = window.setTimeout(() => {
+      setIteration((prev) => prev + 1);
+    }, Math.max(0, loopDelay));
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [done, loop, loopDelay, reduce]);
 
   const progress = text.length ? (typed.length / text.length) * 100 : 100;
 
