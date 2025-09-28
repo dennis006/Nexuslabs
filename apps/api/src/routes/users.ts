@@ -614,7 +614,9 @@ const usersRoutes: FastifyPluginAsync = async (app) => {
         userUpdate.birthday = body.birthday ? new Date(body.birthday) : null;
       }
       if (profileData) {
-        userUpdate.profile = profileData;
+        userUpdate.profile = {
+          upsert: profileData,
+        } as never;
       }
 
       if (body.notifications) {
