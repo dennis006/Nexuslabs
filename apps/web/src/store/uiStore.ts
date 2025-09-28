@@ -5,12 +5,15 @@ type Theme = "dark" | "light";
 
 type Density = "comfortable" | "compact";
 
+type Language = "de" | "en";
+
 type UiStore = {
   theme: Theme;
   sidebarLeftOpen: boolean;
   sidebarRightOpen: boolean;
   activeTab: "new" | "top" | "active" | "unread";
   density: Density;
+  language: Language;
   setTheme: (theme: Theme) => void;
   toggleTheme: () => void;
   setActiveTab: (tab: UiStore["activeTab"]) => void;
@@ -18,6 +21,8 @@ type UiStore = {
   toggleSidebarRight: (open?: boolean) => void;
   setDensity: (density: Density) => void;
   toggleDensity: () => void;
+  setLanguage: (language: Language) => void;
+  toggleLanguage: () => void;
 };
 
 export const useUiStore = create<UiStore>()(
@@ -28,6 +33,7 @@ export const useUiStore = create<UiStore>()(
       sidebarRightOpen: false,
       activeTab: "new",
       density: "comfortable",
+      language: "de",
       setTheme: (theme) => set({ theme }),
       toggleTheme: () => set({ theme: get().theme === "dark" ? "light" : "dark" }),
       setActiveTab: (activeTab) => set({ activeTab }),
@@ -37,7 +43,10 @@ export const useUiStore = create<UiStore>()(
         set(({ sidebarRightOpen }) => ({ sidebarRightOpen: open ?? !sidebarRightOpen })),
       setDensity: (density) => set({ density }),
       toggleDensity: () =>
-        set(({ density }) => ({ density: density === "comfortable" ? "compact" : "comfortable" }))
+        set(({ density }) => ({ density: density === "comfortable" ? "compact" : "comfortable" })),
+      setLanguage: (language) => set({ language }),
+      toggleLanguage: () =>
+        set(({ language }) => ({ language: language === "de" ? "en" : "de" }))
     }),
     { name: "nexuslabs-ui" }
   )

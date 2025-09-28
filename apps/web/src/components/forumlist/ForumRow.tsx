@@ -6,6 +6,7 @@ import type { ForumNode } from "@/lib/api/types";
 import { Badge } from "@/components/ui/badge";
 import { PostCountBadge } from "./PostCountBadge";
 import { LastPostMeta } from "./LastPostMeta";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 const iconLibrary = Icons as unknown as Record<string, LucideIcon>;
 
@@ -21,6 +22,7 @@ type ForumRowProps = {
 
 const ForumRowComponent = ({ data }: ForumRowProps) => {
   const IconComponent = resolveIcon(data.icon);
+  const { t, locale } = useTranslation();
 
   return (
     <motion.article
@@ -56,7 +58,9 @@ const ForumRowComponent = ({ data }: ForumRowProps) => {
             ))}
             {data.children.length > 4 ? (
               <span className="text-[11px] text-muted-foreground">
-                +{data.children.length - 4} more
+                {t("forumlist.childrenMore", {
+                  count: (data.children.length - 4).toLocaleString(locale)
+                })}
               </span>
             ) : null}
           </div>

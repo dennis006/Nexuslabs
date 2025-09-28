@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Flame, Hash, Clock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { mockApi } from "@/lib/api/mockApi";
@@ -8,28 +8,30 @@ import ErrorState from "@/components/common/ErrorState";
 import { Badge } from "@/components/ui/badge";
 import { formatRelativeTime } from "@/lib/utils/time";
 import { useUiStore } from "@/store/uiStore";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 const SidebarRightTrends = () => {
   const [trending, setTrending] = useState<ThreadWithMeta[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const { t, locale, language } = useTranslation();
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
       setLoading(true);
       const response = await mockApi.getThreads({ sort: "hottest", pageSize: 5 });
       setTrending(response.data);
       setError(undefined);
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(err instanceof Error ? err.message : t("forum.error.generic"));
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
   useEffect(() => {
     void load();
-  }, []);
+  }, [load]);
 
   const density = useUiStore((state) => state.density);
 
@@ -39,7 +41,7 @@ const SidebarRightTrends = () => {
   return (
     <div className="space-y-5 data-[density=compact]:space-y-3 2xl:space-y-6" data-density={density}>
       <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-        <Flame className="h-4 w-4 text-orange-400" /> Trends
+        <Flame className="h-4 w-4 text-orange-400" /> {t("sidebar.trends")}
       </h2>
       <div className="space-y-4 md:space-y-5 data-[density=compact]:space-y-3 2xl:space-y-6" data-density={density}>
         {trending.map((thread) => (
@@ -51,10 +53,10 @@ const SidebarRightTrends = () => {
           >
             <div className="flex items-center justify-between text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <span className="flex items-center gap-1">
-                <Hash className="h-4 w-4" /> {thread.tags?.[0] ?? "Thread"}
+                <Hash className="h-4 w-4" /> {thread.tags?.[0] ?? t("thread.defaultTag")}
               </span>
               <span className="flex items-center gap-1">
-                <Clock className="h-4 w-4" /> {formatRelativeTime(thread.updatedAt)}
+                <Clock className="h-4 w-4" /> {formatRelativeTime(thread.updatedAt, language)}
               </span>
             </div>
             <h3 className="line-clamp-2 text-xl font-semibold tracking-tight text-foreground transition group-hover:text-primary 2xl:text-[1.35rem]">
@@ -62,9 +64,9 @@ const SidebarRightTrends = () => {
             </h3>
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               <Badge variant="accent" className="rounded-full px-2.5 py-0.5">
-                {thread.replies} Antworten
+                {t("thread.replies", { count: thread.replies.toLocaleString(locale) })}
               </Badge>
-              <span>{thread.views.toLocaleString("de-DE")} Views</span>
+              <span>{t("thread.views", { count: thread.views.toLocaleString(locale) })}</span>
             </div>
           </Link>
         ))}

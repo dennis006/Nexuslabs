@@ -19,6 +19,7 @@ import {
   Users
 } from "lucide-react";
 import { useUiStore } from "@/store/uiStore";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 const iconMap: Record<string, LucideIcon> = {
   crosshair: Crosshair,
@@ -40,6 +41,7 @@ const MotionLink = motion(Link);
 const CategoryCard = ({ category }: { category: Category }) => {
   const Icon = iconMap[category.icon ?? "sparkles"] ?? Sparkles;
   const density = useUiStore((state) => state.density);
+  const { t, locale } = useTranslation();
 
   return (
     <MotionLink
@@ -73,7 +75,9 @@ const CategoryCard = ({ category }: { category: Category }) => {
               ))}
               {category.subcategories.length > 6 && (
                 <button className="text-[11px] text-primary hover:underline">
-                  +{category.subcategories.length - 6} mehr
+                  {t("category.more", {
+                    count: (category.subcategories.length - 6).toLocaleString(locale)
+                  })}
                 </button>
               )}
             </div>
@@ -81,10 +85,10 @@ const CategoryCard = ({ category }: { category: Category }) => {
 
           <div className="mt-auto pt-4 flex items-center gap-3 text-xs md:text-sm text-muted-foreground">
             <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
-              {category.threadCount} Threads
+              {t("category.threadCount", { count: category.threadCount.toLocaleString(locale) })}
             </Badge>
             <Badge variant="secondary" className="rounded-full px-2.5 py-0.5">
-              {category.postCount} Posts
+              {t("category.postCount", { count: category.postCount.toLocaleString(locale) })}
             </Badge>
           </div>
         </div>

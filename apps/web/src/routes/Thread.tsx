@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Bell, Flag } from "lucide-react";
 import { ThreadPagination } from "@/components/common/ThreadPagination";
 import { useThreadStore } from "@/store/threadStore";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 const Thread = () => {
   const { threadId } = useParams();
@@ -50,6 +51,7 @@ const Thread = () => {
   const [postsError, setPostsError] = useState<string>();
   const [hasFetchedPosts, setHasFetchedPosts] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const { t, locale, language } = useTranslation();
 
   const handlePageChange = useCallback(
     (next: number) => {
@@ -66,7 +68,7 @@ const Thread = () => {
         mockApi.getThreadById(threadId),
         mockApi.getUsers()
       ]);
-      if (!threadData) throw new Error("Thread nicht gefunden");
+      if (!threadData) throw new Error(t("forum.error.generic"));
       setThread(threadData);
       setUsers(userData);
       setThreadError(undefined);
@@ -75,7 +77,7 @@ const Thread = () => {
     } finally {
       setLoading(false);
     }
-  }, [threadId]);
+  }, [threadId, t]);
 
   useEffect(() => {
     void loadThread();
@@ -189,26 +191,29 @@ const Thread = () => {
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <Badge variant="accent" className="uppercase">
-                  {thread.tags?.[0] ?? "Thread"}
+                  {thread.tags?.[0] ?? t("thread.defaultTag")}
                 </Badge>
                 <h1 className="mt-2 text-3xl font-bold text-foreground">{thread.title}</h1>
                 <p className="text-sm text-muted-foreground">
-                  Gestartet von {thread.authorId} • {formatRelativeTime(thread.createdAt)}
+                  {t("thread.started", {
+                    author: thread.authorId,
+                    time: formatRelativeTime(thread.createdAt, language)
+                  })}
                 </p>
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm">
-                  <Bell className="mr-2 h-4 w-4" /> Abonnieren
+                  <Bell className="mr-2 h-4 w-4" /> {t("thread.subscribe")}
                 </Button>
                 <Button variant="ghost" size="sm">
-                  <Flag className="mr-2 h-4 w-4" /> Melden
+                  <Flag className="mr-2 h-4 w-4" /> {t("thread.report")}
                 </Button>
               </div>
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span>{thread.replies} Antworten</span>
-              <span>{thread.views.toLocaleString("de-DE")} Aufrufe</span>
-              <span>Aktualisiert {formatRelativeTime(thread.updatedAt)}</span>
+              <span>{t("thread.replies", { count: thread.replies.toLocaleString(locale) })}</span>
+              <span>{t("thread.views", { count: thread.views.toLocaleString(locale) })}</span>
+              <span>{t("thread.updated", { time: formatRelativeTime(thread.updatedAt, language) })}</span>
             </div>
           </header>
 
@@ -242,10 +247,10 @@ const Thread = () => {
                   </div>
                 ))
               ) : postsError ? (
-                <ErrorState message={postsError} onRetry={retryPosts} />
+                <ErrorState message={postsError ?? t("forum.error.generic")} onRetry={retryPosts} />
               ) : totalCount === 0 ? (
                 <div className="rounded-2xl border border-dashed border-border/60 bg-card/50 p-6 text-center text-sm text-muted-foreground">
-                  Noch keine Antworten – sei der/die Erste!
+                  {t("thread.noReplies")}
                 </div>
               ) : (
                 posts.map((post: Post, index) => (
@@ -276,7 +281,7 @@ const Thread = () => {
         <aside className="space-y-4">
           <div className="rounded-3xl border border-border/60 bg-card/70 p-6">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Teilnehmer
+              {t("thread.participants")}
             </h2>
             <div className="mt-4 flex flex-wrap gap-3">
               {participants.map((user) => (
@@ -295,12 +300,12 @@ const Thread = () => {
           </div>
           <div className="rounded-3xl border border-border/60 bg-card/70 p-6">
             <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-              Ähnliche Threads
+              {t("thread.similar")}
             </h2>
             <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-              <li>Patch Notes Analyse 1.27</li>
-              <li>Scrim Partner gesucht EU</li>
-              <li>Controller vs. Maus – Meta Update</li>
+              <li>{t("thread.similar.first")}</li>
+              <li>{t("thread.similar.second")}</li>
+              <li>{t("thread.similar.third")}</li>
             </ul>
           </div>
         </aside>

@@ -12,6 +12,8 @@ import { register } from "@/lib/api/authApi";
 import { useUserStore } from "@/store/userStore";
 import { USERNAME_PATTERN, USERNAME_TITLE } from "@/features/auth/validation";
 import { useAvailability, type AvailabilityStatus } from "@/features/auth/useAvailability";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
+import type { TranslationKey } from "@/lib/i18n/translations";
 
 // Kawaii Icons for Password Strength
 const KawaiiIcons = {
@@ -74,23 +76,29 @@ const KawaiiIcons = {
 };
 
 // Password Strength Indicator Component
-const PasswordStrengthIndicator = ({ password }: { password: string }) => {
+const PasswordStrengthIndicator = ({
+  password,
+  t,
+}: {
+  password: string;
+  t: (key: TranslationKey, params?: Record<string, string | number>) => string;
+}) => {
   const strength = useMemo(() => {
     if (!password) return { level: 0, text: "", icon: KawaiiIcons.sleeping, color: "text-muted-foreground" };
-    
+
     let score = 0;
     if (password.length >= 8) score++;
     if (/[A-Z]/.test(password)) score++;
     if (/[a-z]/.test(password)) score++;
     if (/[0-9]/.test(password)) score++;
     if (/[^A-Za-z0-9]/.test(password)) score++;
-    
-    if (score <= 1) return { level: 1, text: "Schwach", icon: KawaiiIcons.weak, color: "text-red-500" };
-    if (score <= 2) return { level: 2, text: "Okay", icon: KawaiiIcons.okay, color: "text-yellow-500" };
-    if (score <= 3) return { level: 3, text: "Gut", icon: KawaiiIcons.good, color: "text-blue-500" };
-    if (score <= 4) return { level: 4, text: "Stark", icon: KawaiiIcons.strong, color: "text-green-500" };
-    return { level: 5, text: "Perfekt!", icon: KawaiiIcons.perfect, color: "text-purple-500" };
-  }, [password]);
+
+    if (score <= 1) return { level: 1, text: t("auth.register.passwordStrength.weak"), icon: KawaiiIcons.weak, color: "text-red-500" };
+    if (score <= 2) return { level: 2, text: t("auth.register.passwordStrength.okay"), icon: KawaiiIcons.okay, color: "text-yellow-500" };
+    if (score <= 3) return { level: 3, text: t("auth.register.passwordStrength.good"), icon: KawaiiIcons.good, color: "text-blue-500" };
+    if (score <= 4) return { level: 4, text: t("auth.register.passwordStrength.strong"), icon: KawaiiIcons.strong, color: "text-green-500" };
+    return { level: 5, text: t("auth.register.passwordStrength.perfect"), icon: KawaiiIcons.perfect, color: "text-purple-500" };
+  }, [password, t]);
 
   return (
     <motion.div
@@ -152,6 +160,7 @@ const Register = () => {
   const [form, setForm] = useState({ email: "", username: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const { t } = useTranslation();
 
   const normalizedEmail = form.email.trim().toLowerCase();
   const normalizedUsername = form.username.trim();
@@ -182,15 +191,15 @@ const Register = () => {
         password: form.password,
       });
       setSession(response.user, response.accessToken);
-      toast.success(`Account erstellt! Willkommen, ${response.user.username}.`);
+      toast.success(t("auth.register.toast.success", { name: response.user.username }));
       const redirect = redirectParam || "/forum";
       navigate(redirect, { replace: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "register_failed";
       if (message === "USER_EXISTS") {
-        toast.error("E-Mail oder Benutzername ist bereits vergeben.");
+        toast.error(t("auth.register.toast.exists"));
       } else {
-        toast.error("Registrierung fehlgeschlagen");
+        toast.error(t("auth.register.toast.error"));
       }
     } finally {
       setLoading(false);
@@ -220,15 +229,15 @@ const Register = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.4 }}
             >
-              Account anlegen
+              {t("auth.register.heading")}
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="text-sm text-muted-foreground"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.4 }}
             >
-              Schließe dich der Community an.
+              {t("auth.register.subtitle")}
             </motion.p>
           </motion.div>
 
@@ -246,7 +255,7 @@ const Register = () => {
               transition={{ delay: 0.6, duration: 0.4 }}
             >
               <label className="text-sm font-medium text-muted-foreground" htmlFor="email">
-                E-Mail
+                {t("auth.register.email")}
               </label>
               <motion.div
                 whileFocus={{ scale: 1.02 }}
@@ -269,10 +278,10 @@ const Register = () => {
                 </div>
               </motion.div>
               {status.email === "available" && (
-                <p className="mt-2 text-sm text-emerald-400">Diese E-Mail ist verfügbar.</p>
+                <p className="mt-2 text-sm text-emerald-400">{t("auth.register.email.available")}</p>
               )}
               {status.email === "taken" && (
-                <p className="mt-2 text-sm text-red-400">Diese E-Mail ist bereits vergeben.</p>
+                <p className="mt-2 text-sm text-red-400">{t("auth.register.email.taken")}</p>
               )}
             </motion.div>
 
@@ -283,7 +292,7 @@ const Register = () => {
               transition={{ delay: 0.7, duration: 0.4 }}
             >
               <label className="text-sm font-medium text-muted-foreground" htmlFor="username">
-                Benutzername
+                {t("auth.register.username")}
               </label>
               <motion.div
                 whileFocus={{ scale: 1.02 }}
@@ -310,10 +319,10 @@ const Register = () => {
                 </div>
               </motion.div>
               {status.username === "available" && (
-                <p className="mt-2 text-sm text-emerald-400">Dieser Benutzername ist verfügbar.</p>
+                <p className="mt-2 text-sm text-emerald-400">{t("auth.register.username.available")}</p>
               )}
               {status.username === "taken" && (
-                <p className="mt-2 text-sm text-red-400">Dieser Benutzername ist bereits vergeben.</p>
+                <p className="mt-2 text-sm text-red-400">{t("auth.register.username.taken")}</p>
               )}
             </motion.div>
 
@@ -324,7 +333,7 @@ const Register = () => {
               transition={{ delay: 0.8, duration: 0.4 }}
             >
               <label className="text-sm font-medium text-muted-foreground" htmlFor="password">
-                Passwort
+                {t("auth.register.password")}
               </label>
               <motion.div 
                 className="relative"
@@ -334,7 +343,7 @@ const Register = () => {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder={showPassword ? "Gib dein Passwort ein..." : "••••••"}
+                  placeholder={showPassword ? t("auth.register.passwordPlaceholder") : "••••••"}
                   value={form.password}
                   onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
                   minLength={8}
@@ -396,7 +405,7 @@ const Register = () => {
               </motion.div>
               
               {/* Password Strength Indicator */}
-              <PasswordStrengthIndicator password={form.password} />
+              <PasswordStrengthIndicator password={form.password} t={t} />
             </motion.div>
 
             <motion.div
@@ -423,7 +432,7 @@ const Register = () => {
                       className="flex items-center gap-2"
                     >
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Wird erstellt...
+                      {t("auth.register.loading")}
                     </motion.div>
                   ) : (
                     <motion.div
@@ -434,7 +443,7 @@ const Register = () => {
                       className="flex items-center gap-2"
                     >
                       <UserPlus className="h-4 w-4" />
-                      Registrieren
+                      {t("auth.register.submit")}
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -457,16 +466,16 @@ const Register = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 1.0, duration: 0.4 }}
           >
-            Bereits ein Konto?{' '}
+            {t("auth.register.loginPrompt")}{' '}
             <motion.span
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <Link 
-                to={redirectParam ? `/login?redirectTo=${encodeURIComponent(redirectParam)}` : "/login"} 
+              <Link
+                to={redirectParam ? `/login?redirectTo=${encodeURIComponent(redirectParam)}` : "/login"}
                 className="text-primary hover:underline"
               >
-                Login
+                {t("auth.register.loginLink")}
               </Link>
             </motion.span>
           </motion.p>

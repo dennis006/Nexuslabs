@@ -1,5 +1,7 @@
 import type { LastPost } from "@/lib/api/types";
 import { cn } from "@/lib/utils/cn";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
+import { formatDateTime } from "@/lib/utils/time";
 
 type LastPostMetaProps = {
   data?: LastPost;
@@ -10,11 +12,12 @@ type LastPostMetaProps = {
 export function LastPostMeta({ data, className, align = "right" }: LastPostMetaProps) {
   const textAlignment = align === "left" ? "text-left" : "text-right";
   const justify = align === "left" ? "justify-start" : "justify-end";
+  const { t, locale } = useTranslation();
 
   if (!data) {
     return (
       <div className={cn("text-sm text-muted-foreground/70", textAlignment, className)}>
-        No posts yet
+        {t("forumlist.noPosts")}
       </div>
     );
   }
@@ -31,7 +34,10 @@ export function LastPostMeta({ data, className, align = "right" }: LastPostMetaP
           {data.threadTitle}
         </a>
         <p className="text-xs text-muted-foreground">
-          By <span className="font-medium">{data.author.name}</span>, {new Date(data.createdAt).toLocaleString()}
+          {t("forumlist.lastPost", {
+            author: data.author.name,
+            time: formatDateTime(data.createdAt, locale)
+          })}
         </p>
       </div>
     </div>

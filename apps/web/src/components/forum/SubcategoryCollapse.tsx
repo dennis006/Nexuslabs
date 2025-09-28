@@ -1,6 +1,7 @@
 import { useId, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import type { SubCategory } from "@/lib/api/types";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 interface SubcategoryCollapseProps {
   subs: SubCategory[];
@@ -13,6 +14,7 @@ const SubcategoryCollapse = ({ subs }: SubcategoryCollapseProps) => {
   const collapseId = useId();
   const visibleSubs = useMemo(() => (open ? subs : subs.slice(0, 6)), [open, subs]);
   const showToggle = subs.length > 6;
+  const { t, locale } = useTranslation();
 
   return (
     <div className="mt-3">
@@ -30,7 +32,7 @@ const SubcategoryCollapse = ({ subs }: SubcategoryCollapseProps) => {
               <span
                 key={`sub_${sub.id}`}
                 className="rounded-full bg-secondary/60 px-2.5 py-1 text-xs"
-                title={`${sub.threadCount} Threads`}
+                title={t("category.subs.tooltip", { count: sub.threadCount.toLocaleString(locale) })}
               >
                 {sub.name}
               </span>
@@ -49,7 +51,11 @@ const SubcategoryCollapse = ({ subs }: SubcategoryCollapseProps) => {
           aria-expanded={open}
           aria-controls={collapseId}
         >
-          {open ? "Weniger anzeigen" : `Mehr anzeigen (${subs.length - 6})`}
+          {open
+            ? t("category.subs.less")
+            : t("category.subs.moreCount", {
+                count: (subs.length - 6).toLocaleString(locale)
+              })}
         </button>
       ) : null}
     </div>

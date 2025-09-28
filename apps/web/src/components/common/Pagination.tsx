@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n/TranslationProvider";
 
 type RangeItem = number | "…";
 
@@ -39,6 +40,7 @@ export function Pagination({
   totalPages: number;
   onPageChange: (p: number) => void;
 }) {
+  const { t } = useTranslation();
   if (totalPages <= 1) return null;
   const clamp = (p: number) => Math.min(Math.max(p, 1), totalPages);
   const range = buildRange(page, totalPages);
@@ -46,14 +48,14 @@ export function Pagination({
   return (
     <nav
       className="flex items-center justify-center gap-1 py-4"
-      aria-label="Kommentare paginieren"
+      aria-label={t("threadPagination.page", { current: page, total: totalPages })}
     >
       <Button
         variant="ghost"
         size="icon"
         onClick={() => onPageChange(clamp(page - 1))}
         disabled={page === 1}
-        aria-label="Vorherige Seite"
+        aria-label={t("threadPagination.previous")}
       >
         «
       </Button>
@@ -79,7 +81,7 @@ export function Pagination({
         size="icon"
         onClick={() => onPageChange(clamp(page + 1))}
         disabled={page === totalPages}
-        aria-label="Nächste Seite"
+        aria-label={t("threadPagination.next")}
       >
         »
       </Button>
