@@ -3,7 +3,7 @@ import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 import type { Engine, ISourceOptions } from "@tsparticles/engine";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import PageTransition from "@/components/layout/PageTransition";
 import TypewriterTitle from "@/components/TypewriterTitle";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,6 @@ const features = [
 ];
 
 const Landing = () => {
-  const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
   const [particlesReady, setParticlesReady] = useState(false);
   useGsapScrollReveal("[data-animate-card]");
@@ -103,24 +102,31 @@ const Landing = () => {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
             className="space-y-6"
           >
-            <span className="mx-auto inline-flex items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs uppercase tracking-wide text-primary">
-              NexusLabs – The Next-Gen Gaming Forum
-            </span>
+            <Link
+              to="/forum"
+              className="mx-auto inline-flex items-center justify-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary transition hover:border-primary/60 hover:bg-primary/15"
+              aria-label="NexusLabs – The Next-Gen Gaming Forum"
+            >
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" aria-hidden />
+              NEXUSLABS – THE NEXT-GEN GAMING FORUM
+            </Link>
             <TypewriterTitle
               text="Verbinde dich mit der Elite der Gaming-Community"
               className="mx-auto mb-6 max-w-[1100px] text-center"
+              loop={false}
             />
             <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
               Diskutiere Meta-Strategien, organisiere Scrims und erhalte Insights direkt aus der Szene. Mit Live-Presence, animierten Statistiken und einem Dock-Chat bleibst du immer verbunden.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">
-              <Button size="lg" onClick={() => navigate("/forum")}
-                className="group">
-                <span>Forum betreten</span>
-                <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <Button size="lg" className="group" asChild>
+                <Link to="/forum">
+                  <span>Forum betreten</span>
+                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
               </Button>
-              <Button size="lg" variant="outline" onClick={() => navigate("/register")}>
-                Konto erstellen
+              <Button size="lg" variant="outline" asChild>
+                <Link to="/register">Konto erstellen</Link>
               </Button>
             </div>
             {stats ? (
