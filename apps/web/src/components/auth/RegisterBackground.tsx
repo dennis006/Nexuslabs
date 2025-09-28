@@ -78,6 +78,15 @@ const cometTrails = [
 
 const latticeColumns = ["left-[12%]", "left-[50%]", "left-[82%]"];
 
+const constellations = [
+  { top: "18%", left: "16%", delay: 0 },
+  { top: "72%", left: "22%", delay: 1.8 },
+  { top: "28%", left: "74%", delay: 2.6 },
+  { top: "64%", left: "70%", delay: 0.9 },
+  { top: "44%", left: "50%", delay: 3.2 },
+  { top: "82%", left: "54%", delay: 4.1 },
+];
+
 const RegisterBackground = () => (
   <div className="pointer-events-none absolute inset-0 overflow-hidden">
     {gradientOrbs.map((orb, index) => (
@@ -163,6 +172,22 @@ const RegisterBackground = () => (
           className="absolute left-1/2 top-1/2 h-20 w-px -translate-x-1/2 -translate-y-full bg-gradient-to-t from-sky-200/60 via-transparent to-transparent"
           animate={{ scaleY: [0.4, 1, 0.5], opacity: [0.3, 0.7, 0.3] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: comet.delay + 0.6 }}
+        />
+      </motion.span>
+    ))}
+
+    {constellations.map((constellation, index) => (
+      <motion.span
+        key={`constellation-${index}`}
+        className="absolute h-2 w-2 rounded-full bg-cyan-300/90 shadow-[0_0_18px_rgba(103,232,249,0.8)]"
+        style={{ top: constellation.top, left: constellation.left }}
+        animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.4, 0.8] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: constellation.delay }}
+      >
+        <motion.span
+          className="absolute -top-8 left-1/2 h-8 w-px -translate-x-1/2 bg-gradient-to-t from-cyan-300/40 via-transparent to-transparent"
+          animate={{ scaleY: [0.3, 1, 0.6], opacity: [0.1, 0.4, 0.1] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: constellation.delay + 0.6 }}
         />
       </motion.span>
     ))}
