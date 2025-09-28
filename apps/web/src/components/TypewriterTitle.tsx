@@ -94,14 +94,15 @@ export default function TypewriterTitle({
         className={clsx(
           "relative z-10 font-extrabold tracking-tight",
           "text-[clamp(32px,6vw,72px)] leading-[1.05]",
-          "text-[#E7F9FF] drop-shadow-[0_2px_20px_rgba(0,200,255,0.15)]"
+          "text-foreground drop-shadow-[0_1px_12px_rgba(56,189,248,0.18)]",
+          "dark:text-[#E7F9FF] dark:drop-shadow-[0_2px_20px_rgba(0,200,255,0.15)]"
         )}
       >
         <span className="pointer-events-none select-none text-transparent whitespace-pre-wrap">
           {text}
         </span>
         <span className="absolute inset-0">
-          <span className="text-[#E7F9FF] whitespace-pre-wrap">
+          <span className="whitespace-pre-wrap text-foreground dark:text-[#E7F9FF]">
             {reduce
               ? text
               : typed.map(({ char, id }) => (
