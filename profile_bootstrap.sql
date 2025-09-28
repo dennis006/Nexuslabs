@@ -343,14 +343,31 @@ BEGIN
         "timeFormat" = 'H24'
   WHERE "userId" = v_admin_id;
 
-  INSERT INTO public."Badge" (id, slug, name, description, icon, "isSeasonal")
+  INSERT INTO public."Badge" (slug, name, description, icon, "isSeasonal", "seasonKey")
   VALUES
-    (gen_random_uuid()::text, 'core-team', 'Core Team', 'Bestätigtes Mitglied des NexusLabs Kernteams.', 'ShieldCheck', false),
-    (gen_random_uuid()::text, 'operations-lead', 'Operations Lead', 'Verantwortlich für Operations und Community-Sicherheit.', 'Workflow', false)
+    ('core-team', 'Core Team', 'Bestätigtes Mitglied des NexusLabs Kernteams.', 'ShieldCheck', false, NULL),
+    ('operations-lead', 'Operations Lead', 'Verantwortlich für Operations und Community-Sicherheit.', 'Workflow', false, NULL),
+    ('founder', 'Founder', 'Gründungsmitglied von NexusLabs.', 'Crown', false, NULL),
+    ('early-adopter', 'Early Adopter', 'Unter den ersten 100 Mitgliedern der Community.', 'Rocket', false, NULL),
+    ('verified', 'Verifiziert', 'Identität durch das NexusLabs Team bestätigt.', 'BadgeCheck', false, NULL),
+    ('community-champion', 'Community Champion', 'Steht für eine positive NexusLabs Community-Kultur.', 'Users', false, NULL),
+    ('top-poster', 'Top Poster', 'Veröffentlicht regelmäßig hochwertige Beiträge und Diskussionen.', 'MessageSquare', false, NULL),
+    ('knowledge-sharer', 'Knowledge Sharer', 'Teilt Guides und beantwortet Fachfragen im Forum.', 'BookOpen', false, NULL),
+    ('event-champion', 'Event Champion', 'Gewinner eines offiziellen NexusLabs Community-Events.', 'Trophy', true, 'community-events'),
+    ('bug-hunter', 'Bug Hunter', 'Meldet kritische Bugs und hilft beim Testen neuer Features.', 'Bug', false, NULL),
+    ('helpful-responder', 'Helpful Responder', 'Hilft anderen Mitgliedern mit schnellen und hilfreichen Antworten.', 'LifeBuoy', false, NULL),
+    ('mentor', 'Mentor', 'Begleitet neue Mitglieder und unterstützt beim Einstieg.', 'GraduationCap', false, NULL),
+    ('creative-mind', 'Creative Mind', 'Teilt kreative Projekte und inspiriert die Community.', 'Palette', false, NULL),
+    ('community-builder', 'Community Builder', 'Organisiert Community-Projekte und bringt Leute zusammen.', 'Hammer', false, NULL)
   ON CONFLICT (slug) DO UPDATE
     SET name = EXCLUDED.name,
         description = EXCLUDED.description,
-        icon = EXCLUDED.icon;
+        icon = EXCLUDED.icon,
+        "isSeasonal" = EXCLUDED."isSeasonal",
+        "seasonKey" = EXCLUDED."seasonKey",
+        "startsAt" = EXCLUDED."startsAt",
+        "endsAt" = EXCLUDED."endsAt",
+        "updatedAt" = now();
 
   SELECT id INTO v_core_team_badge FROM public."Badge" WHERE slug = 'core-team';
   SELECT id INTO v_operations_badge FROM public."Badge" WHERE slug = 'operations-lead';
