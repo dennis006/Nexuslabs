@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import PageTransition from "@/components/layout/PageTransition";
+import AuthBackground from "@/components/auth/AuthBackground";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { login } from "@/lib/api/authApi";
@@ -47,47 +48,50 @@ const Login = () => {
 
   return (
     <PageTransition>
-      <div className="mx-auto max-w-md space-y-6 rounded-3xl border border-border/60 bg-card/70 p-8">
-        <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-bold">Willkommen zurück</h1>
-          <p className="text-sm text-muted-foreground">Melde dich an, um mitzudiskutieren.</p>
+      <div className="relative flex min-h-[calc(100vh-6rem)] items-center justify-center px-4 py-16">
+        <AuthBackground />
+        <div className="relative z-10 mx-auto w-full max-w-md space-y-6 rounded-3xl border border-border/50 bg-card/80 p-8 backdrop-blur-xl shadow-[0_25px_70px_-30px_rgba(56,189,248,0.55)]">
+          <div className="space-y-2 text-center">
+            <h1 className="text-2xl font-bold">Willkommen zurück</h1>
+            <p className="text-sm text-muted-foreground">Melde dich an, um mitzudiskutieren.</p>
+          </div>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground" htmlFor="emailOrUsername">
+                E-Mail oder Benutzername
+              </label>
+              <Input
+                id="emailOrUsername"
+                type="text"
+                placeholder="you@nexuslabs.gg"
+                value={form.emailOrUsername}
+                onChange={(event) => setForm((prev) => ({ ...prev, emailOrUsername: event.target.value }))}
+                required
+                disabled={loading}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-muted-foreground" htmlFor="password">
+                Passwort
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••"
+                value={form.password}
+                onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+                required
+                disabled={loading}
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Wird geprüft..." : "Login"}
+            </Button>
+          </form>
+          <p className="text-center text-xs text-muted-foreground">
+            Noch kein Konto? <Link to="/register" className="text-primary">Registrieren</Link>
+          </p>
         </div>
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground" htmlFor="emailOrUsername">
-              E-Mail oder Benutzername
-            </label>
-            <Input
-              id="emailOrUsername"
-              type="text"
-              placeholder="you@nexuslabs.gg"
-              value={form.emailOrUsername}
-              onChange={(event) => setForm((prev) => ({ ...prev, emailOrUsername: event.target.value }))}
-              required
-              disabled={loading}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground" htmlFor="password">
-              Passwort
-            </label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••"
-              value={form.password}
-              onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
-              required
-              disabled={loading}
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Wird geprüft..." : "Login"}
-          </Button>
-        </form>
-        <p className="text-center text-xs text-muted-foreground">
-          Noch kein Konto? <Link to="/register" className="text-primary">Registrieren</Link>
-        </p>
       </div>
     </PageTransition>
   );
