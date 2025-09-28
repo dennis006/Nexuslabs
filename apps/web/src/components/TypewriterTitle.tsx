@@ -107,7 +107,7 @@ export default function TypewriterTitle({
               ? text
               : typed.map(({ char, id }) => (
                   <motion.span
-                    key={id}
+                    key={`${iteration}-${id}`}
                     initial={{ y: "-0.25em", opacity: 0, filter: "blur(6px)" }}
                     animate={{ y: "0em", opacity: 1, filter: "blur(0px)" }}
                     transition={{
