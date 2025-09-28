@@ -105,9 +105,9 @@ export default function TypewriterTitle({
           <span className="whitespace-pre-wrap text-foreground dark:text-[#E7F9FF]">
             {reduce
               ? text
-              : typed.map(({ char, id }) => (
+              : typed.map(({ char }, index) => (
                   <motion.span
-                    key={`${iteration}-${id}`}
+                    key={`${iteration}-${index}`}
                     initial={{ y: "-0.25em", opacity: 0, filter: "blur(6px)" }}
                     animate={{ y: "0em", opacity: 1, filter: "blur(0px)" }}
                     transition={{
