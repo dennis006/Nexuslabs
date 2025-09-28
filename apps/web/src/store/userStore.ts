@@ -23,7 +23,7 @@ export type User = {
   role: Role;
 };
 
-type State = {
+export type State = {
   user: User | null;
   accessToken: string | null;
 };
@@ -49,3 +49,5 @@ export const useUserStore = create<State & Actions>((set) => ({
       return { user: null, accessToken: null };
     })
 }));
+
+export const isAuthedSelector = (state: State) => Boolean(state.user && state.accessToken);

@@ -15,6 +15,8 @@ import { useUiStore } from "@/store/uiStore";
 import { usePresenceSubscription } from "@/lib/realtime/presence";
 import { SESSION_STORAGE_KEY, useUserStore } from "@/store/userStore";
 import { me, refresh } from "@/lib/api/authApi";
+import RequireAuth from "@/components/routing/RequireAuth";
+import RequireGuest from "@/components/routing/RequireGuest";
 
 const ThemeWatcher = () => {
   const theme = useUiStore((state) => state.theme);
@@ -107,9 +109,38 @@ const App = () => {
           <Route path="/forums" element={<Forums />} />
           <Route path="/forum/:categoryId" element={<Category />} />
           <Route path="/thread/:threadId" element={<Thread />} />
-          <Route path="/create" element={<CreatePost />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route
+            path="/create"
+            element={
+              <RequireAuth>
+                <CreatePost />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/forum/:categoryId/create"
+            element={
+              <RequireAuth>
+                <CreatePost />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <RequireGuest>
+                <Login />
+              </RequireGuest>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <RequireGuest>
+                <Register />
+              </RequireGuest>
+            }
+          />
         </Routes>
       </AnimatedRoutes>
       <Toaster richColors expand position="top-center" />

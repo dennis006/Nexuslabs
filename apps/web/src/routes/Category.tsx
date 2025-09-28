@@ -55,7 +55,11 @@ const Category = () => {
             <Button
               className="rounded-xl"
               variant={canPost ? "default" : "outline"}
-              onClick={() => (canPost ? navigate(`/forum/${categoryId}/create`) : navigate("/login", { state: { from: location.pathname } }))}
+              onClick={() =>
+                canPost
+                  ? navigate(`/forum/${categoryId}/create`)
+                  : navigate(`/login?redirectTo=${encodeURIComponent(location.pathname + location.search)}`)
+              }
             >
               {canPost ? "Neuer Thread" : "Login erforderlich"}
             </Button>

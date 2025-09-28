@@ -41,11 +41,12 @@ const Header = () => {
   };
 
   const goToCreate = () => {
-    navigate("/create", { state: { from: location.pathname } });
+    navigate("/create");
   };
 
   const redirectToLogin = () => {
-    navigate("/login", { state: { from: location.pathname } });
+    const redirectTo = encodeURIComponent(location.pathname + location.search);
+    navigate(`/login?redirectTo=${redirectTo}`);
   };
 
   return (

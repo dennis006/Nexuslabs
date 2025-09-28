@@ -1,6 +1,6 @@
 import type { FormEvent } from "react";
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import PageTransition from "@/components/layout/PageTransition";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,9 @@ import { USERNAME_PATTERN, USERNAME_TITLE } from "@/features/auth/validation";
 
 const Register = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const setSession = useUserStore((state) => state.setSession);
+  const redirectParam = searchParams.get("redirectTo");
   const [form, setForm] = useState({ email: "", username: "", password: "" });
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +24,8 @@ const Register = () => {
       const response = await register(form);
       setSession(response.user, response.accessToken);
       toast.success(`Account erstellt! Willkommen, ${response.user.username}.`);
-      navigate("/forum", { replace: true });
+      const redirect = redirectParam || "/forum";
+      navigate(redirect, { replace: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "register_failed";
       if (message === "USER_EXISTS") {
@@ -95,7 +98,10 @@ const Register = () => {
           </Button>
         </form>
         <p className="text-center text-xs text-muted-foreground">
-          Bereits ein Konto? <Link to="/login" className="text-primary">Login</Link>
+          Bereits ein Konto?{' '}
+          <Link to={redirectParam ? `/login?redirectTo=${encodeURIComponent(redirectParam)}` : "/login"} className="text-primary">
+            Login
+          </Link>
         </p>
       </div>
     </PageTransition>
