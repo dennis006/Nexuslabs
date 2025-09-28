@@ -1,4 +1,11 @@
-import { animate, motion, useMotionTemplate, useMotionValue, useTransform } from "framer-motion";
+import {
+  animate,
+  motion,
+  useMotionTemplate,
+  useMotionValue,
+  useTransform,
+  type AnimationPlaybackControls
+} from "framer-motion";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils/cn";
 
@@ -17,14 +24,63 @@ const HandwritingText = ({ text, className, delay = 0.4 }: HandwritingTextProps)
   const penOpacity = useTransform(progress, [0, 5, 92, 100], [0, 1, 1, 0]);
 
   useEffect(() => {
-    const controls = animate(progress, 100, {
-      duration: 3.6,
-      ease: [0.35, 0, 0.15, 1],
-      delay
-    });
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let controls: AnimationPlaybackControls | undefined;
+
+    const stopAnimation = () => {
+      controls?.stop();
+      controls = undefined;
+    };
+
+    const startAnimation = () =>
+      animate(progress, 100, {
+        duration: 3.6,
+        ease: [0.35, 0, 0.15, 1],
+        delay
+      });
+
+    const enableReducedMotion = () => {
+      stopAnimation();
+      progress.set(100);
+    };
+
+    const enableAnimation = () => {
+      stopAnimation();
+      progress.set(0);
+      controls = startAnimation();
+    };
+
+    const handleChange = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        enableReducedMotion();
+      } else {
+        enableAnimation();
+      }
+    };
+
+    if (mediaQuery.matches) {
+      enableReducedMotion();
+    } else {
+      enableAnimation();
+    }
+
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", handleChange);
+    } else {
+      mediaQuery.addListener(handleChange);
+    }
 
     return () => {
-      controls.stop();
+      stopAnimation();
+      if (typeof mediaQuery.removeEventListener === "function") {
+        mediaQuery.removeEventListener("change", handleChange);
+      } else {
+        mediaQuery.removeListener(handleChange);
+      }
     };
   }, [delay, progress]);
 
