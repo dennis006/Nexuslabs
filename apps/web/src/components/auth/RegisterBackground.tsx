@@ -67,7 +67,7 @@ const comets: CometConfig[] = [
 const gradientOrbs = [
   {
     className:
-      "absolute -left-24 -top-20 h-[30rem] w-[30rem] rounded-[46%] bg-[radial-gradient(circle_at_35%_35%,_rgba(59,130,246,0.55),_rgba(15,23,42,0))] blur-[120px]",
+      "absolute -left-24 -top-20 h-[30rem] w-[30rem] rounded-[46%] bg-[radial-gradient(circle_at_35%_35%,_rgba(59,130,246,0.55),_rgba(15,23,42,0))] dark:bg-[radial-gradient(circle_at_35%_35%,_rgba(59,130,246,0.55),_rgba(15,23,42,0))] blur-[120px]",
     animate: {
       x: [0, 28, -12, 20, 0],
       y: [0, -18, 12, -8, 0],
@@ -78,7 +78,7 @@ const gradientOrbs = [
   },
   {
     className:
-      "absolute -right-28 bottom-[-10rem] h-[34rem] w-[34rem] rounded-[50%] bg-[radial-gradient(circle_at_65%_75%,_rgba(236,72,153,0.55),_rgba(15,23,42,0))] blur-[130px]",
+      "absolute -right-28 bottom-[-10rem] h-[34rem] w-[34rem] rounded-[50%] bg-[radial-gradient(circle_at_65%_75%,_rgba(236,72,153,0.55),_rgba(15,23,42,0))] dark:bg-[radial-gradient(circle_at_65%_75%,_rgba(236,72,153,0.55),_rgba(15,23,42,0))] blur-[130px]",
     animate: {
       x: [0, -24, 18, -16, 0],
       y: [0, 16, -18, 10, 0],
@@ -89,7 +89,7 @@ const gradientOrbs = [
   },
   {
     className:
-      "absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[conic-gradient(from_160deg,_rgba(14,165,233,0.6),_rgba(244,114,182,0.45),_rgba(14,165,233,0.6))] opacity-80",
+      "absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[conic-gradient(from_160deg,_rgba(14,165,233,0.6),_rgba(244,114,182,0.45),_rgba(14,165,233,0.6))] dark:bg-[conic-gradient(from_160deg,_rgba(14,165,233,0.6),_rgba(244,114,182,0.45),_rgba(14,165,233,0.6))] opacity-80",
     animate: {
       rotate: [0, 360],
     },
@@ -106,18 +106,18 @@ const glyphStrokes = [
 const haloRings = [
   {
     size: "h-[32rem] w-[32rem]",
-    border: "border-cyan-300/20",
+    border: "border-cyan-300/20 dark:border-cyan-300/20",
     duration: 44,
   },
   {
     size: "h-[26rem] w-[26rem]",
-    border: "border-pink-400/20",
+    border: "border-pink-400/20 dark:border-pink-400/20",
     duration: 58,
     reverse: true,
   },
   {
     size: "h-[20rem] w-[20rem]",
-    border: "border-indigo-400/20",
+    border: "border-indigo-400/20 dark:border-indigo-400/20",
     duration: 68,
   },
 ];
@@ -171,7 +171,7 @@ const RegisterBackground = () => (
     ))}
 
     <motion.div
-      className="absolute left-1/2 top-1/2 h-[18rem] w-[18rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_50%_45%,_rgba(148,163,184,0.35),_rgba(15,23,42,0))]"
+      className="absolute left-1/2 top-1/2 h-[18rem] w-[18rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle_at_50%_45%,_rgba(148,163,184,0.35),_rgba(15,23,42,0))] dark:bg-[radial-gradient(circle_at_50%_45%,_rgba(148,163,184,0.35),_rgba(15,23,42,0))]"
       animate={{ scale: [0.9, 1.08, 0.92, 1.04, 0.9], opacity: [0.4, 0.75, 0.45, 0.7, 0.4] }}
       transition={{ duration: 24, repeat: Infinity, ease: "easeInOut" }}
     />
@@ -226,7 +226,7 @@ const RegisterBackground = () => (
     {latticeColumns.map((position, index) => (
       <motion.div
         key={`lattice-${index}`}
-        className={`absolute ${position} h-full w-px bg-gradient-to-b from-transparent via-cyan-200/20 to-transparent`}
+        className={`absolute ${position} h-full w-px bg-gradient-to-b from-transparent via-cyan-200/20 dark:via-cyan-200/20 to-transparent`}
         animate={{ opacity: [0.2, 0.55, 0.2] }}
         transition={{ duration: 26 + index * 4, repeat: Infinity, ease: "easeInOut", delay: index * 2 }}
       />
@@ -235,13 +235,13 @@ const RegisterBackground = () => (
     {cometTrails.map((comet, index) => (
       <motion.span
         key={`trail-${index}`}
-        className="absolute h-1.5 w-1.5 rounded-full bg-sky-200/90 shadow-[0_0_25px_rgba(125,211,252,0.7)]"
+        className="absolute h-1.5 w-1.5 rounded-full bg-sky-200/90 dark:bg-sky-200/90 shadow-[0_0_25px_rgba(125,211,252,0.7)]"
         style={{ top: comet.top, left: comet.left }}
         animate={{ opacity: [0, 1, 0], scale: [0.8, 1.6, 0.8] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: comet.delay }}
       >
         <motion.span
-          className="absolute left-1/2 top-1/2 h-20 w-px -translate-x-1/2 -translate-y-full bg-gradient-to-t from-sky-200/60 via-transparent to-transparent"
+          className="absolute left-1/2 top-1/2 h-20 w-px -translate-x-1/2 -translate-y-full bg-gradient-to-t from-sky-200/60 dark:from-sky-200/60 via-transparent to-transparent"
           animate={{ scaleY: [0.4, 1, 0.5], opacity: [0.3, 0.7, 0.3] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: comet.delay + 0.6 }}
         />
@@ -249,7 +249,7 @@ const RegisterBackground = () => (
     ))}
 
     <motion.span
-      className="absolute -left-32 top-1/4 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.5),_rgba(12,17,33,0))] blur-3xl"
+      className="absolute -left-32 top-1/4 h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.5),_rgba(12,17,33,0))] dark:bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.5),_rgba(12,17,33,0))] blur-3xl"
       animate={{
         x: ["0%", "12%", "-18%", "4%", "0%"],
         y: ["0%", "-10%", "8%", "-6%", "0%"],
@@ -285,7 +285,7 @@ const RegisterBackground = () => (
     {comets.map((comet, index) => (
       <motion.span
         key={`comet-${index}`}
-        className="absolute h-px w-48 rounded-full bg-gradient-to-r from-transparent via-cyan-200/70 to-cyan-400/0"
+        className="absolute h-px w-48 rounded-full bg-gradient-to-r from-transparent via-cyan-200/70 dark:via-cyan-200/70 to-cyan-400/0 dark:to-cyan-400/0"
         style={{ top: comet.top }}
         initial={{
           x: comet.direction === "right" ? "-20%" : "120%",
@@ -309,7 +309,7 @@ const RegisterBackground = () => (
     {glyphs.map((glyph, index) => (
       <motion.span
         key={`glyph-${glyph.symbol}-${index}`}
-        className="absolute text-4xl font-light text-cyan-100/40 mix-blend-screen"
+        className="absolute text-4xl font-light text-cyan-100/40 dark:text-cyan-100/40 mix-blend-screen"
         style={{ top: glyph.top, left: glyph.left }}
         animate={{
           y: ["-6%", "6%", "-4%"],
@@ -330,14 +330,14 @@ const RegisterBackground = () => (
         animate={{ opacity: [0.2, 0.7, 0.2], rotate: [0, 8, -8, 0] }}
         transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: constellation.delay }}
       >
-        <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-100/80 shadow-[0_0_12px_rgba(165,243,252,0.7)]" />
-        <span className="absolute left-[35%] top-[25%] h-1 w-1 rounded-full bg-sky-200/70" />
-        <span className="absolute left-[65%] top-[65%] h-1 w-1 rounded-full bg-sky-200/50" />
+        <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-100/80 dark:bg-cyan-100/80 shadow-[0_0_12px_rgba(165,243,252,0.7)]" />
+        <span className="absolute left-[35%] top-[25%] h-1 w-1 rounded-full bg-sky-200/70 dark:bg-sky-200/70" />
+        <span className="absolute left-[65%] top-[65%] h-1 w-1 rounded-full bg-sky-200/50 dark:bg-sky-200/50" />
       </motion.div>
     ))}
 
     <motion.span
-      className="absolute right-[-18%] top-[-22%] h-[38rem] w-[38rem] rounded-full bg-[conic-gradient(from_120deg_at_50%_50%,_rgba(56,189,248,0.4),_rgba(244,114,182,0.4),_rgba(34,197,94,0.35),_rgba(56,189,248,0.4))] opacity-70 blur-[130px]"
+      className="absolute right-[-18%] top-[-22%] h-[38rem] w-[38rem] rounded-full bg-[conic-gradient(from_120deg_at_50%_50%,_rgba(56,189,248,0.4),_rgba(244,114,182,0.4),_rgba(34,197,94,0.35),_rgba(56,189,248,0.4))] dark:bg-[conic-gradient(from_120deg_at_50%_50%,_rgba(56,189,248,0.4),_rgba(244,114,182,0.4),_rgba(34,197,94,0.35),_rgba(56,189,248,0.4))] opacity-70 blur-[130px]"
       animate={{ rotate: [0, 360] }}
       transition={{ duration: 68, repeat: Infinity, ease: "linear" }}
     />
