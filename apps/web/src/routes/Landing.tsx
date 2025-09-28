@@ -105,8 +105,18 @@ const Landing = () => {
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-3 py-1 text-xs uppercase tracking-wide text-primary">
               NexusLabs – The Next-Gen Gaming Forum
             </span>
-            <h1 className="mb-6 text-balance text-4xl font-bold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-              Verbinde dich mit der Elite der Gaming-Community
+            <h1 className="relative mb-6 text-balance text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+              <span className="aurora-text block leading-tight">
+                Verbinde dich mit der Elite der Gaming-Community
+              </span>
+              <motion.span
+                aria-hidden
+                className="pointer-events-none absolute -bottom-4 left-1/2 h-1 w-2/3 -translate-x-1/2 rounded-full bg-gradient-to-r from-cyan-400/70 via-primary to-amber-400/70 blur-[1px]"
+                initial={{ opacity: 0, scaleX: 0.5 }}
+                animate={{ opacity: 1, scaleX: 1 }}
+                transition={{ delay: 0.4, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                style={{ originX: 0.5 }}
+              />
             </h1>
             <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
               Diskutiere Meta-Strategien, organisiere Scrims und erhalte Insights direkt aus der Szene. Mit Live-Presence, animierten Statistiken und einem Dock-Chat bleibst du immer verbunden.
