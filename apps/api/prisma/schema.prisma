@@ -13,12 +13,284 @@ model User {
   username     String   @unique
   passwordHash String
   role         Role     @default(MEMBER)
+  displayName  String?
+  bio          String?
+  avatarUrl    String?
+  coverImage   String?
+  pronouns     String?
+  website      String?
+  location     String?
+  timezone     String?
+  language     String?
+  signature    String?
+  birthday     DateTime?
+  lastSeenAt   DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  profile             UserProfile?
+  stats               UserStats?
+  notificationSettings UserNotificationSetting?
+  privacySettings     UserPrivacySetting?
+  appearanceSettings  UserAppearanceSetting?
+  securityEvents      UserSecurityEvent[]
+  sessions            UserSession[]
+  twoFactor           UserTwoFactor?
+  connectedAccounts   ConnectedAccount[]
+  badgeAwards         UserBadge[]
+  followers           UserFollow[]    @relation("followers")
+  following           UserFollow[]    @relation("following")
+  actionsReceived     UserDisciplinaryAction[] @relation("actionsReceived")
+  actionsIssued       UserDisciplinaryAction[] @relation("actionsIssued")
 }
 
 enum Role {
   GUEST
   MEMBER
   ADMIN
+}
+
+model UserProfile {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  bio       String?
+  about     String?
+  interests String?
+  socials   Json?
+  links     Json?
+  badges    Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserStats {
+  id             String      @id @default(cuid())
+  userId         String      @unique
+  topics         Int         @default(0)
+  posts          Int         @default(0)
+  likesGiven     Int         @default(0)
+  likesReceived  Int         @default(0)
+  reputation     Int         @default(0)
+  trustLevel     TrustLevel  @default(NEWCOMER)
+  streakDays     Int         @default(0)
+  longestStreak  Int         @default(0)
+  streakUpdatedAt DateTime?
+  lastActiveAt   DateTime?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserNotificationSetting {
+  id            String @id @default(cuid())
+  userId        String @unique
+  emailMentions Boolean @default(true)
+  emailFollows  Boolean @default(true)
+  emailDigest   Boolean @default(false)
+  pushMentions  Boolean @default(true)
+  pushReplies   Boolean @default(true)
+  pushFollows   Boolean @default(false)
+  watchedThreads Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserPrivacySetting {
+  id              String @id @default(cuid())
+  userId          String @unique
+  showEmail       Boolean @default(false)
+  showLastOnline  Boolean @default(true)
+  showBirthday    Boolean @default(false)
+  showLocation    Boolean @default(true)
+  showPronouns    Boolean @default(true)
+  allowMessages   Boolean @default(true)
+  allowTagging    Boolean @default(true)
+  blockedUsers    String[] @default([])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserAppearanceSetting {
+  id         String           @id @default(cuid())
+  userId     String           @unique
+  theme      ThemePreference  @default(SYSTEM)
+  density    DensityPreference @default(COMFORTABLE)
+  accent     String?          
+  language   String?
+  timeFormat TimeFormatPreference @default(H24)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserSecurityEvent {
+  id         String            @id @default(cuid())
+  userId     String
+  type       SecurityEventType
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?
+  createdAt  DateTime          @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserSession {
+  id         String   @id @default(cuid())
+  userId     String
+  userAgent  String?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  expiresAt  DateTime
+  revokedAt  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserTwoFactor {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  secret      String
+  enabled     Boolean  @default(false)
+  backupCodes String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ConnectedAccount {
+  id          String             @id @default(cuid())
+  userId      String
+  provider    ConnectedProvider
+  providerId  String
+  displayName String?
+  profileUrl  String?
+  verified    Boolean            @default(false)
+  metadata    Json?
+  linkedAt    DateTime           @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@unique([userId, provider])
+}
+
+model Badge {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  description String
+  icon        String?
+  isSeasonal  Boolean  @default(false)
+  seasonKey   String?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  awards UserBadge[]
+}
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userId    String
+  badgeId   String
+  earnedAt  DateTime @default(now())
+  seasonKey String?
+  note      String?
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId, seasonKey])
+}
+
+model UserFollow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower User @relation("following", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+}
+
+model UserDisciplinaryAction {
+  id          String             @id @default(cuid())
+  userId      String
+  issuedById  String?
+  type        DisciplinaryType
+  reason      String
+  active      Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  expiresAt   DateTime?
+
+  user     User @relation("actionsReceived", fields: [userId], references: [id], onDelete: Cascade)
+  issuedBy User? @relation("actionsIssued", fields: [issuedById], references: [id])
+}
+
+enum TrustLevel {
+  NEWCOMER
+  MEMBER
+  CONTRIBUTOR
+  VETERAN
+  MODERATOR
+  ADMINISTRATOR
+}
+
+enum ThemePreference {
+  LIGHT
+  DARK
+  SYSTEM
+}
+
+enum DensityPreference {
+  COMFORTABLE
+  COMPACT
+}
+
+enum TimeFormatPreference {
+  H12
+  H24
+}
+
+enum SecurityEventType {
+  LOGIN
+  LOGOUT
+  PASSWORD_CHANGE
+  PASSWORD_RESET
+  TWO_FA_ENABLED
+  TWO_FA_DISABLED
+  SESSION_INVALIDATED
+  DEVICE_LOGOUT
+}
+
+enum ConnectedProvider {
+  DISCORD
+  GITHUB
+  STEAM
+  TWITTER
+  MASTODON
+  BLUESKY
+  LINKEDIN
+  WEBSITE
+  OTHER
+}
+
+enum DisciplinaryType {
+  WARNING
+  TEMP_BAN
+  PERM_BAN
+  NOTE
 }

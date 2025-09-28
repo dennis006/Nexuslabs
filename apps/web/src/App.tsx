@@ -11,6 +11,7 @@ import CreatePost from "@/routes/CreatePost";
 import Forums from "@/routes/Forums";
 import Login from "@/routes/Auth/Login";
 import Register from "@/routes/Auth/Register";
+import Profile from "@/routes/Profile";
 import { useUiStore } from "@/store/uiStore";
 import { usePresenceSubscription } from "@/lib/realtime/presence";
 import { SESSION_STORAGE_KEY, useUserStore } from "@/store/userStore";
@@ -109,6 +110,7 @@ const App = () => {
           <Route path="/forums" element={<Forums />} />
           <Route path="/forum/:categoryId" element={<Category />} />
           <Route path="/thread/:threadId" element={<Thread />} />
+          <Route path="/u/:handle" element={<Profile />} />
           <Route
             path="/create"
             element={
