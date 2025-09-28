@@ -1,6 +1,6 @@
 import type { FormEvent } from "react";
-import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import PageTransition from "@/components/layout/PageTransition";
 import { Input } from "@/components/ui/input";
@@ -10,10 +10,19 @@ import { useUserStore } from "@/store/userStore";
 
 const Login = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const setSession = useUserStore((state) => state.setSession);
+  const user = useUserStore((state) => state.user);
+  const token = useUserStore((state) => state.accessToken);
   const [form, setForm] = useState({ emailOrUsername: "", password: "" });
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user && token) {
+      const redirect = searchParams.get("redirectTo") || "/forum";
+      navigate(redirect, { replace: true });
+    }
+  }, [user, token, navigate, searchParams]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -22,8 +31,8 @@ const Login = () => {
       const response = await login(form);
       setSession(response.user, response.accessToken);
       toast.success(`Willkommen zurück, ${response.user.username}!`);
-      const redirectTo = (location.state as { from?: string } | null)?.from ?? "/forum";
-      navigate(redirectTo, { replace: true });
+      const redirect = searchParams.get("redirectTo") || "/forum";
+      navigate(redirect, { replace: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : "login_failed";
       if (message === "INVALID_CREDENTIALS") {

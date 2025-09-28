@@ -23,9 +23,10 @@ const CreatePost = () => {
 
   useEffect(() => {
     if (!user) {
-      navigate("/login", { replace: true, state: { from: location.pathname } });
+      const redirectTo = encodeURIComponent(location.pathname + location.search);
+      navigate(`/login?redirectTo=${redirectTo}`, { replace: true });
     }
-  }, [user, navigate, location.pathname]);
+  }, [user, navigate, location.pathname, location.search]);
 
   useEffect(() => {
     if (!categoryId) {
