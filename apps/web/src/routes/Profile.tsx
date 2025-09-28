@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type ReactNode,
+} from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   followProfile,
@@ -35,11 +43,13 @@ import {
   MapPin,
   MessageCircle,
   PencilLine,
+  Trash2,
   Shield,
   ShieldCheck,
   Sparkles,
   Star,
   Trophy,
+  Upload,
   Users,
   X,
 } from "lucide-react";
@@ -127,6 +137,8 @@ const Profile = () => {
   const [form, setForm] = useState<FormState>(DEFAULT_FORM);
   const [saving, setSaving] = useState(false);
   const [followLoading, setFollowLoading] = useState(false);
+  const avatarFileInputRef = useRef<HTMLInputElement | null>(null);
+  const coverFileInputRef = useRef<HTMLInputElement | null>(null);
 
   const sanitizedHandle = useMemo(() => handle.replace(/^@/, ""), [handle]);
   const maxBirthday = useMemo(() => new Date().toISOString().slice(0, 10), []);
@@ -328,6 +340,44 @@ const Profile = () => {
     });
   };
 
+  const handleImageFileChange = (
+    event: ChangeEvent<HTMLInputElement>,
+    key: "avatarUrl" | "coverImage"
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      toast.error(t("profile.form.image.invalidType"));
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error(t("profile.form.image.tooLarge"));
+      event.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        handleFormChange(key, reader.result);
+      } else {
+        toast.error(t("profile.form.image.invalidType"));
+      }
+    };
+    reader.onerror = () => {
+      toast.error(t("profile.form.image.invalidType"));
+    };
+    reader.onloadend = () => {
+      event.target.value = "";
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handlePrivacyToggle = (key: PrivacyFieldKey, value: boolean) => {
     setForm((prev) => {
       const nextPrivacy = { ...(prev.privacy ?? {}) } as NonNullable<FormState["privacy"]>;
@@ -361,28 +411,79 @@ const Profile = () => {
   };
 
   const buildPayload = (): UpdateProfilePayload => {
-    const trim = (value: string | null | undefined) => {
+    const trimToNull = (value: string | null | undefined) => {
       if (value === undefined) return undefined;
       if (value === null) return null;
       const next = value.trim();
       return next.length === 0 ? null : next;
     };
 
-    const payload: UpdateProfilePayload = {
-      displayName: trim(form.displayName ?? null) ?? null,
-      bio: trim(form.bio ?? null) ?? null,
-      pronouns: trim(form.pronouns ?? null) ?? null,
-      location: trim(form.location ?? null) ?? null,
-      timezone: trim(form.timezone ?? null) ?? null,
-      website: trim(form.website ?? null) ?? null,
-      language: trim(form.language ?? null) ?? null,
-      signature: trim(form.signature ?? null) ?? null,
-      about: trim(form.about ?? null) ?? null,
-      interests: trim(form.interests ?? null) ?? null,
-      avatarUrl: trim(form.avatarUrl ?? null) ?? null,
-      coverImage: trim(form.coverImage ?? null) ?? null,
-      birthday: form.birthday ?? null,
-    };
+    const payload: UpdateProfilePayload = {};
+
+    const normalizedDisplayName =
+      form.displayName === undefined || form.displayName === null
+        ? undefined
+        : form.displayName.trim();
+    if (normalizedDisplayName) {
+      payload.displayName = normalizedDisplayName;
+    }
+
+    const normalizedBio = trimToNull(form.bio ?? null);
+    if (normalizedBio !== undefined) {
+      payload.bio = normalizedBio;
+    }
+
+    const normalizedPronouns = trimToNull(form.pronouns ?? null);
+    if (normalizedPronouns !== undefined) {
+      payload.pronouns = normalizedPronouns;
+    }
+
+    const normalizedLocation = trimToNull(form.location ?? null);
+    if (normalizedLocation !== undefined) {
+      payload.location = normalizedLocation;
+    }
+
+    const normalizedTimezone = trimToNull(form.timezone ?? null);
+    if (normalizedTimezone !== undefined) {
+      payload.timezone = normalizedTimezone;
+    }
+
+    const normalizedWebsite = trimToNull(form.website ?? null);
+    if (normalizedWebsite !== undefined) {
+      payload.website = normalizedWebsite;
+    }
+
+    const normalizedLanguage = trimToNull(form.language ?? null);
+    if (normalizedLanguage !== undefined) {
+      payload.language = normalizedLanguage;
+    }
+
+    const normalizedSignature = trimToNull(form.signature ?? null);
+    if (normalizedSignature !== undefined) {
+      payload.signature = normalizedSignature;
+    }
+
+    const normalizedAbout = trimToNull(form.about ?? null);
+    if (normalizedAbout !== undefined) {
+      payload.about = normalizedAbout;
+    }
+
+    const normalizedInterests = trimToNull(form.interests ?? null);
+    if (normalizedInterests !== undefined) {
+      payload.interests = normalizedInterests;
+    }
+
+    const normalizedAvatar = trimToNull(form.avatarUrl ?? null);
+    if (normalizedAvatar !== undefined) {
+      payload.avatarUrl = normalizedAvatar;
+    }
+
+    const normalizedCover = trimToNull(form.coverImage ?? null);
+    if (normalizedCover !== undefined) {
+      payload.coverImage = normalizedCover;
+    }
+
+    payload.birthday = form.birthday ?? null;
 
     if (form.socials && form.socials.length > 0) {
       payload.socials = form.socials
@@ -977,6 +1078,102 @@ const renderMetadataItem = (
                   <CardDescription>{t("profile.settings.profile.subtitle")}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
+                  <div className="grid gap-6 md:grid-cols-2">
+                    <div className="flex flex-col gap-3">
+                      <label className="text-sm font-medium">{t("profile.form.avatar")}</label>
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                        <Avatar className="h-20 w-20">
+                          {form.avatarUrl ? (
+                            <AvatarImage src={form.avatarUrl} alt={t("profile.form.avatar") ?? "Avatar"} />
+                          ) : null}
+                          <AvatarFallback>
+                            {(form.displayName?.trim() || profile.displayName || profile.handle || "NL")
+                              .slice(0, 2)
+                              .toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 space-y-2">
+                          <Input
+                            type="url"
+                            placeholder="https://..."
+                            value={form.avatarUrl ?? ""}
+                            onChange={(event) => handleFormChange("avatarUrl", event.target.value)}
+                          />
+                          <div className="flex flex-wrap gap-2">
+                            <input
+                              ref={avatarFileInputRef}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(event) => handleImageFileChange(event, "avatarUrl")}
+                            />
+                            <Button type="button" variant="outline" onClick={() => avatarFileInputRef.current?.click()}>
+                              <Upload className="mr-2 h-4 w-4" />
+                              {t("profile.form.image.upload")}
+                            </Button>
+                            {form.avatarUrl ? (
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => handleFormChange("avatarUrl", null)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                {t("profile.form.image.remove")}
+                              </Button>
+                            ) : null}
+                          </div>
+                          <p className="text-xs text-muted-foreground">{t("profile.form.avatar.hint")}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-3">
+                      <label className="text-sm font-medium">{t("profile.form.cover")}</label>
+                      <div className="space-y-2">
+                        <div className="h-24 w-full overflow-hidden rounded-xl border border-dashed border-border/60 bg-muted/30">
+                          {form.coverImage ? (
+                            <div
+                              className="h-full w-full bg-cover bg-center"
+                              style={{ backgroundImage: `url(${form.coverImage})` }}
+                            />
+                          ) : (
+                            <div className="flex h-full items-center justify-center text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              {t("profile.form.cover.placeholder")}
+                            </div>
+                          )}
+                        </div>
+                        <Input
+                          type="url"
+                          placeholder="https://..."
+                          value={form.coverImage ?? ""}
+                          onChange={(event) => handleFormChange("coverImage", event.target.value)}
+                        />
+                        <div className="flex flex-wrap gap-2">
+                          <input
+                            ref={coverFileInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(event) => handleImageFileChange(event, "coverImage")}
+                          />
+                          <Button type="button" variant="outline" onClick={() => coverFileInputRef.current?.click()}>
+                            <Upload className="mr-2 h-4 w-4" />
+                            {t("profile.form.image.upload")}
+                          </Button>
+                          {form.coverImage ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => handleFormChange("coverImage", null)}
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              {t("profile.form.image.remove")}
+                            </Button>
+                          ) : null}
+                        </div>
+                        <p className="text-xs text-muted-foreground">{t("profile.form.cover.hint")}</p>
+                      </div>
+                    </div>
+                  </div>
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="flex flex-col gap-2">
                       <label className="text-sm font-medium">{t("profile.form.displayName")}</label>
