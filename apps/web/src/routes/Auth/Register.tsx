@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import PageTransition from "@/components/layout/PageTransition";
-import AuthBackground from "@/components/auth/AuthBackground";
+import RegisterBackground from "@/components/auth/RegisterBackground";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { register } from "@/lib/api/authApi";
@@ -42,7 +42,7 @@ const Register = () => {
   return (
     <PageTransition>
       <div className="relative flex min-h-[calc(100vh-6rem)] items-center justify-center px-4 py-16">
-        <AuthBackground />
+        <RegisterBackground />
         <div className="relative z-10 mx-auto w-full max-w-md space-y-6 rounded-3xl border border-border/50 bg-card/80 p-8 backdrop-blur-xl shadow-[0_25px_70px_-30px_rgba(56,189,248,0.55)]">
           <div className="space-y-2 text-center">
             <h1 className="text-2xl font-bold">Account anlegen</h1>
