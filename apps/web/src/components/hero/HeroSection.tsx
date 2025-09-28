@@ -58,13 +58,13 @@ export default function HeroSection() {
       },
       particles: {
         color: {
-          value: ["#06b6d4", "#3b82f6", "#8b5cf6"]
+          value: ["#0ea5e9", "#3b82f6", "#8b5cf6", "#6366f1"]
         },
         links: {
-          color: "#06b6d4",
+          color: "#0ea5e9",
           distance: 150,
           enable: true,
-          opacity: 0.5,
+          opacity: 0.3,
           width: 1
         },
         move: {
@@ -84,7 +84,7 @@ export default function HeroSection() {
           value: 60 // Reduziert für bessere Performance
         },
         opacity: {
-          value: 0.5
+          value: 0.6
         },
         shape: {
           type: "circle"
@@ -113,12 +113,12 @@ export default function HeroSection() {
         <Link
           to="/forum"
           className="mx-auto mb-5 inline-flex w-auto items-center gap-2 rounded-full
-                     border border-cyan-400/30 bg-cyan-400/10 px-3 py-1
-                     text-xs font-semibold tracking-wide text-cyan-200
-                     shadow-[0_0_20px_rgba(34,211,238,0.15)]"
+                     border border-primary/40 bg-primary/10 px-3 py-1
+                     text-xs font-semibold tracking-wide text-primary
+                     shadow-[0_0_20px_rgba(34,211,238,0.15)] dark:shadow-[0_0_20px_rgba(34,211,238,0.15)]"
           aria-label="NexusLabs – The Next-Gen Gaming Forum"
         >
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-cyan-300" />
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-primary" />
           NEXUSLABS – THE NEXT-GEN GAMING FORUM
         </Link>
 
@@ -129,7 +129,7 @@ export default function HeroSection() {
         />
 
         {/* === SUBCOPY === */}
-        <p className="mx-auto mt-6 max-w-[820px] text-base sm:text-lg leading-relaxed text-slate-200/90">
+        <p className="mx-auto mt-6 max-w-[820px] text-base sm:text-lg leading-relaxed text-muted-foreground">
           Diskutiere Meta-Strategien, organisiere Scrims und erhalte Insights direkt
           aus der Szene. Mit Live-Presence, animierten Statistiken und einem Dock-
           Chat bleibst du immer verbunden.
@@ -139,15 +139,15 @@ export default function HeroSection() {
         <div className="mt-8 flex items-center justify-center gap-3">
           <Link
             to="/forum"
-            className="inline-flex items-center justify-center rounded-xl bg-cyan-400/90 px-5 py-3
-                       font-semibold text-slate-900 hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300"
+            className="inline-flex items-center justify-center rounded-xl bg-primary px-5 py-3
+                       font-semibold text-primary-foreground hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary"
           >
             Forum betreten →
           </Link>
           <Link
             to="/register"
-            className="inline-flex items-center justify-center rounded-xl border border-white/15 px-5 py-3
-                       font-semibold text-slate-100 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
+            className="inline-flex items-center justify-center rounded-xl border border-border px-5 py-3
+                       font-semibold text-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             Konto erstellen
           </Link>

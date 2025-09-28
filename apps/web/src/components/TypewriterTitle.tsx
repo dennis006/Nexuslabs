@@ -135,23 +135,23 @@ export default function TypewriterTitle({
 
       {underline && (
         <div className="relative mt-3 h-[3px] rounded-full overflow-hidden">
-          <div className="absolute inset-0 bg-cyan-400/30" />
+          <div className="absolute inset-0 bg-primary/30" />
           {reduce ? (
             <div
-              className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-300 via-sky-300 to-violet-300"
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-primary"
               style={{ width: "100%" }}
             />
           ) : (
             <>
               <motion.div
-                className="absolute inset-y-0 left-0 bg-gradient-to-r from-cyan-300 via-sky-300 to-violet-300"
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary via-primary to-primary"
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}
                 transition={{ type: "tween", ease: [0.22, 0.12, 0.18, 1], duration: 0.25 }}
               />
               <motion.span
                 className="absolute top-1/2 -translate-y-1/2 h-[6px] w-[6px] rounded-full
-                           bg-white/80 shadow-[0_0_10px_4px_rgba(56,189,248,0.35)]"
+                           bg-primary-foreground shadow-[0_0_10px_4px_rgba(34,211,238,0.35)] dark:shadow-[0_0_10px_4px_rgba(56,189,248,0.35)]"
                 initial={false}
                 animate={{ left: `${Math.max(2, progress)}%` }}
                 transition={{ type: "tween", duration: 0.25 }}
