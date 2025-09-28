@@ -1,109 +1,41 @@
-import {
-  animate,
-  motion,
-  useMotionTemplate,
-  useMotionValue,
-  useTransform,
-  type AnimationPlaybackControls
-} from "framer-motion";
-import { useEffect } from "react";
-import { cn } from "@/lib/utils/cn";
+import { motion, useReducedMotion } from "framer-motion";
+import clsx from "clsx";
 
-type HandwritingTextProps = {
-  text: string;
+type Props = {
+  children: string;
   className?: string;
-  delay?: number;
+  duration?: number; // Sek.
+  delay?: number; // Sek.
 };
 
-const HandwritingText = ({ text, className, delay = 0.4 }: HandwritingTextProps) => {
-  const progress = useMotionValue(0);
-  const backgroundSize = useMotionTemplate`${progress}% 100%`;
-  const penLeft = useMotionTemplate`calc(${progress}% - 0.75rem)`;
-  const glowOpacity = useTransform(progress, [0, 35, 100], [0.85, 0.4, 0]);
-  const glowFilter = useMotionTemplate`drop-shadow(0 0 18px rgba(0, 224, 255, ${glowOpacity}))`;
-  const penOpacity = useTransform(progress, [0, 5, 92, 100], [0, 1, 1, 0]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return undefined;
-    }
-
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let controls: AnimationPlaybackControls | undefined;
-
-    const stopAnimation = () => {
-      controls?.stop();
-      controls = undefined;
-    };
-
-    const startAnimation = () =>
-      animate(progress, 100, {
-        duration: 3.6,
-        ease: [0.35, 0, 0.15, 1],
-        delay
-      });
-
-    const enableReducedMotion = () => {
-      stopAnimation();
-      progress.set(100);
-    };
-
-    const enableAnimation = () => {
-      stopAnimation();
-      progress.set(0);
-      controls = startAnimation();
-    };
-
-    const handleChange = (event: MediaQueryListEvent) => {
-      if (event.matches) {
-        enableReducedMotion();
-      } else {
-        enableAnimation();
-      }
-    };
-
-    if (mediaQuery.matches) {
-      enableReducedMotion();
-    } else {
-      enableAnimation();
-    }
-
-    if (typeof mediaQuery.addEventListener === "function") {
-      mediaQuery.addEventListener("change", handleChange);
-    } else {
-      mediaQuery.addListener(handleChange);
-    }
-
-    return () => {
-      stopAnimation();
-      if (typeof mediaQuery.removeEventListener === "function") {
-        mediaQuery.removeEventListener("change", handleChange);
-      } else {
-        mediaQuery.removeListener(handleChange);
-      }
-    };
-  }, [delay, progress]);
+export default function HandwritingText({
+  children,
+  className,
+  duration = 2.2,
+  delay = 0.15
+}: Props) {
+  const reduce = useReducedMotion();
 
   return (
-    <span className={cn("handwriting relative inline-flex", className)}>
-      <motion.span
-        aria-hidden
-        className="handwriting__text"
-        style={{
-          backgroundSize,
-          filter: glowFilter
-        }}
-      >
-        {text}
-      </motion.span>
-      <span className="sr-only">{text}</span>
-      <motion.span
-        aria-hidden
-        className="handwriting__pen"
-        style={{ left: penLeft, opacity: penOpacity }}
-      />
+    <span className={clsx("relative inline-block leading-tight", className)}>
+      {/* 1) Immer sichtbarer Basis-Text (keine Transparenz!) */}
+      <span className="relative z-10 font-extrabold tracking-tight text-[clamp(28px,5vw,64px)] text-[#E7F9FF]">
+        {children}
+      </span>
+
+      {/* 2) Overlay: animierte Handschrift/Wisch-Maske (nur wenn Motion erlaubt) */}
+      {!reduce && (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-20 [--reveal:0%] handwriting-mask"
+          initial={{ ["--reveal" as any]: "0%" }}
+          animate={{ ["--reveal" as any]: "100%" }}
+          transition={{ duration, delay, ease: [0.25, 0.1, 0.25, 1] }}
+        >
+          {/* farbiges Overlay, das durch die Maske „schreibt“ */}
+          <span className="block h-full w-full rounded-sm bg-gradient-to-r from-cyan-300 via-sky-300 to-teal-200 opacity-95" />
+        </motion.span>
+      )}
     </span>
   );
-};
-
-export default HandwritingText;
+}
