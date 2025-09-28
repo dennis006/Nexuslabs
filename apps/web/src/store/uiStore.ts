@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type Theme = "dark" | "light";
+export type Theme = "dark" | "light" | "system";
 
 type Density = "comfortable" | "compact";
 
@@ -27,15 +27,20 @@ type UiStore = {
 
 export const useUiStore = create<UiStore>()(
   persist(
-    (set, get) => ({
-      theme: "dark",
+    (set) => ({
+      theme: "system",
       sidebarLeftOpen: false,
       sidebarRightOpen: false,
       activeTab: "new",
       density: "comfortable",
       language: "de",
       setTheme: (theme) => set({ theme }),
-      toggleTheme: () => set({ theme: get().theme === "dark" ? "light" : "dark" }),
+      toggleTheme: () =>
+        set(({ theme }) => {
+          if (theme === "light") return { theme: "dark" };
+          if (theme === "dark") return { theme: "light" };
+          return { theme: "light" };
+        }),
       setActiveTab: (activeTab) => set({ activeTab }),
       toggleSidebarLeft: (open) =>
         set(({ sidebarLeftOpen }) => ({ sidebarLeftOpen: open ?? !sidebarLeftOpen })),

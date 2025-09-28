@@ -12,7 +12,7 @@ import Forums from "@/routes/Forums";
 import Login from "@/routes/Auth/Login";
 import Register from "@/routes/Auth/Register";
 import Profile from "@/routes/Profile";
-import { useUiStore } from "@/store/uiStore";
+import { useUiStore, type Theme } from "@/store/uiStore";
 import { usePresenceSubscription } from "@/lib/realtime/presence";
 import { SESSION_STORAGE_KEY, useUserStore } from "@/store/userStore";
 import { me, refresh } from "@/lib/api/authApi";
@@ -23,17 +23,32 @@ const ThemeWatcher = () => {
   const theme = useUiStore((state) => state.theme);
   const density = useUiStore((state) => state.density);
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const root = document.documentElement;
-    root.classList.remove("light", "dark");
-    root.classList.add(theme);
-    localStorage.setItem("nexuslabs-theme", theme);
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const resolveTheme = () => (theme === "system" ? (media.matches ? "dark" : "light") : theme);
+    const apply = () => {
+      const resolved = resolveTheme();
+      root.classList.remove("light", "dark");
+      root.classList.add(resolved);
+    };
+    apply();
+    if (theme === "system") {
+      media.addEventListener("change", apply);
+      return () => {
+        media.removeEventListener("change", apply);
+      };
+    }
+    return undefined;
   }, [theme]);
   useEffect(() => {
+    if (typeof window === "undefined") return;
     document.documentElement.dataset.density = density;
   }, [density]);
   useEffect(() => {
-    const stored = localStorage.getItem("nexuslabs-theme") as "light" | "dark" | null;
-    if (stored) {
+    if (typeof window === "undefined") return;
+    const stored = localStorage.getItem("nexuslabs-theme") as Theme | null;
+    if (stored === "light" || stored === "dark" || stored === "system") {
       useUiStore.setState({ theme: stored });
     }
     const storedDensity = localStorage.getItem("nexuslabs-density") as "comfortable" | "compact" | null;
@@ -42,6 +57,11 @@ const ThemeWatcher = () => {
     }
   }, []);
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem("nexuslabs-theme", theme);
+  }, [theme]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     localStorage.setItem("nexuslabs-density", density);
   }, [density]);
   return null;
